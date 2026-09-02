@@ -23,6 +23,7 @@
     --red:#B23A2E; --red-bg:#FBE7E4;
   }
   *{box-sizing:border-box;}
+  html,body{overflow-x:hidden;}
   body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
   h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;}
   .app{max-width:1180px;margin:0 auto;padding:0 24px 60px;}
@@ -77,6 +78,9 @@
   label{display:block;font-size:11.5px;font-weight:600;color:var(--mute);margin:0 0 4px;text-transform:none;}
   input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;font-size:13.5px;font-family:inherit;color:var(--txt);background:var(--white);}
   input:focus,select:focus,textarea:focus{outline:2px solid var(--steel-lt);outline-offset:0;border-color:var(--steel);}
+  input[readonly]{background:var(--bg);color:var(--mute);cursor:not-allowed;}
+  .req{color:var(--red);font-weight:700;margin-left:2px;}
+  .fieldhint{font-size:10.5px;color:var(--mute);margin-top:3px;}
   .field{margin-bottom:12px;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
@@ -112,7 +116,9 @@
   .pill.red{background:var(--red-bg);color:var(--red);}
 
   .kpaxis{position:relative;height:26px;border-bottom:1px solid var(--line);margin:6px 0 14px;}
-  .kpaxis .tick{position:absolute;top:0;font-size:10px;color:var(--mute);transform:translateX(-50%);}
+  .kpaxis .tick{position:absolute;top:0;font-size:10px;color:var(--mute);white-space:nowrap;transform:translateX(-50%);}
+  .kpaxis .tick.tick-first{transform:none;}
+  .kpaxis .tick.tick-last{left:auto!important;right:0;transform:none;}
   .kpaxis .tickline{position:absolute;bottom:0;width:1px;height:8px;background:var(--mute);}
 
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--white);padding:12px 20px;border-radius:8px;font-size:13.5px;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;z-index:50;}
@@ -172,8 +178,13 @@
     </div>
     <div class="authmsg" id="authMsg"></div>
     <form id="authForm">
-      <div class="field"><label>Email</label><input type="email" id="auth_email" required autocomplete="username"></div>
-      <div class="field"><label>Password</label><input type="password" id="auth_password" required autocomplete="current-password" minlength="6"></div>
+      <div class="field" id="signupOnlyName" hidden><label>Full Name<span class="req">*</span></label><input type="text" id="auth_fullname" placeholder="e.g. Yahya Al-Balushi" autocomplete="name"></div>
+      <div class="field"><label>Email<span class="req">*</span></label><input type="email" id="auth_email" required autocomplete="username"></div>
+      <div class="field"><label>Password<span class="req">*</span></label><input type="password" id="auth_password" required autocomplete="current-password" minlength="6"></div>
+      <div class="row2" id="signupOnlyRow" hidden>
+        <div class="field"><label>Job Title<span class="req">*</span></label><input type="text" id="auth_jobtitle" placeholder="e.g. Civil Engineer" autocomplete="organization-title"></div>
+        <div class="field"><label>Company<span class="req">*</span></label><input type="text" id="auth_company" placeholder="e.g. Contractor Co." autocomplete="organization"></div>
+      </div>
       <button type="submit" class="primary" id="authSubmitBtn" style="width:100%;">Sign In</button>
     </form>
     <p class="footnote" id="setupHint"></p>
@@ -199,7 +210,7 @@
       </div>
     </div>
   </div>
-  <div class="corridor"><span style="left:0%"></span><span style="left:33%"></span><span style="left:64%"></span><span style="left:100%"></span></div>
+  <div class="corridor"><span style="left:0%"></span><span style="left:33%"></span><span style="left:64%"></span><span style="right:0"></span></div>
   <div class="app">
     <nav class="tabs">
       <button data-tab="entry" class="active">Field Entry</button>
@@ -223,8 +234,9 @@
           <fieldset>
             <legend>Location &amp; Identity</legend>
             <div class="row2">
-              <div class="field"><label>Entered By (your name)</label><input type="text" id="f_enteredby" placeholder="e.g. Yahya Al-Balushi" required></div>
-              <div class="field"><label>Date</label><input type="date" id="f_date" required></div>
+              <div class="field"><label>Entered By (your name)</label><input type="text" id="f_enteredby" required>
+                <p class="fieldhint">Auto-filled from your account</p></div>
+              <div class="field"><label>Date<span class="req">*</span></label><input type="date" id="f_date" required></div>
             </div>
             <div class="row3">
               <div class="field"><label>Team / Spread</label>
@@ -236,8 +248,8 @@
               <div class="field"><label>&nbsp;</label></div>
             </div>
             <div class="row2">
-              <div class="field"><label>KP From</label><input type="number" step="0.001" id="f_kpfrom" placeholder="e.g. 24.300" required></div>
-              <div class="field"><label>KP To</label><input type="number" step="0.001" id="f_kpto" placeholder="e.g. 25.100" required></div>
+              <div class="field"><label>KP From<span class="req">*</span></label><input type="number" step="0.001" id="f_kpfrom" placeholder="e.g. 24.300" required></div>
+              <div class="field"><label>KP To<span class="req">*</span></label><input type="number" step="0.001" id="f_kpto" placeholder="e.g. 25.100" required></div>
             </div>
           </fieldset>
 
@@ -386,10 +398,11 @@
         <p class="sub">Water, weather, access, equipment, manpower, material, design, QA/QC, HSE, client, third-party.</p>
         <form id="constraintForm">
           <div class="row2">
-            <div class="field"><label>Entered By</label><input type="text" id="c_enteredby" placeholder="e.g. Yahya Al-Balushi" required></div>
-            <div class="field"><label>Date Identified</label><input type="date" id="c_date" required></div>
+            <div class="field"><label>Entered By</label><input type="text" id="c_enteredby" required>
+              <p class="fieldhint">Auto-filled from your account</p></div>
+            <div class="field"><label>Date Identified<span class="req">*</span></label><input type="date" id="c_date" required></div>
           </div>
-          <div class="field"><label>KP / Location</label><input type="text" id="c_kp" placeholder="35+000–36+500" required></div>
+          <div class="field"><label>KP / Location<span class="req">*</span></label><input type="text" id="c_kp" placeholder="35+000–36+500" required></div>
           <div class="row2">
             <div class="field"><label>Activity Affected</label>
               <select id="c_activity">
@@ -407,7 +420,7 @@
               </select>
             </div>
           </div>
-          <div class="field"><label>Description</label><textarea id="c_desc" rows="2" placeholder="What is happening..." required></textarea></div>
+          <div class="field"><label>Description<span class="req">*</span></label><textarea id="c_desc" rows="2" placeholder="What is happening..." required></textarea></div>
           <div class="row3">
             <div class="field"><label>Responsible Party</label><input type="text" id="c_resp" placeholder="Civil Engineer"></div>
             <div class="field"><label>Priority</label>
@@ -476,11 +489,19 @@ function clearAuthMsg(){
 }
 
 let authMode = 'signin';
+function setSignupFieldsVisible(visible){
+  document.getElementById('signupOnlyName').hidden = !visible;
+  document.getElementById('signupOnlyRow').hidden = !visible;
+  ['auth_fullname','auth_jobtitle','auth_company'].forEach(id=>{
+    document.getElementById(id).required = visible;
+  });
+}
 document.getElementById('tabSignIn').addEventListener('click', ()=>{
   authMode = 'signin';
   document.getElementById('tabSignIn').classList.add('active');
   document.getElementById('tabSignUp').classList.remove('active');
   document.getElementById('authSubmitBtn').textContent = 'Sign In';
+  setSignupFieldsVisible(false);
   clearAuthMsg();
 });
 document.getElementById('tabSignUp').addEventListener('click', ()=>{
@@ -488,6 +509,7 @@ document.getElementById('tabSignUp').addEventListener('click', ()=>{
   document.getElementById('tabSignUp').classList.add('active');
   document.getElementById('tabSignIn').classList.remove('active');
   document.getElementById('authSubmitBtn').textContent = 'Create Account';
+  setSignupFieldsVisible(true);
   clearAuthMsg();
 });
 
@@ -507,7 +529,10 @@ document.getElementById('authForm').addEventListener('submit', async (e)=>{
       const { error } = await sb.auth.signInWithPassword({ email, password });
       if(error) showAuthMsg(error.message, false);
     } else {
-      const { data, error } = await sb.auth.signUp({ email, password });
+      const full_name = document.getElementById('auth_fullname').value.trim();
+      const job_title = document.getElementById('auth_jobtitle').value.trim();
+      const company = document.getElementById('auth_company').value.trim();
+      const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name, job_title, company } } });
       if(error){ showAuthMsg(error.message, false); }
       else if(data.session){ /* auto-confirmed, onAuthStateChange will pick it up */ }
       else { showAuthMsg('Account created. Check your email to confirm, then sign in.', true); }
@@ -525,12 +550,17 @@ function onSignedIn(user){
   currentUser = user;
   document.getElementById('authScreen').hidden = true;
   document.getElementById('appRoot').hidden = false;
-  document.getElementById('userEmail').textContent = user.email;
+  const meta = user.user_metadata || {};
   const nicename = user.email.split('@')[0].replace(/[._]+/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+  const displayName = meta.full_name || nicename;
+  const profileBits = [displayName, meta.job_title, meta.company].filter(Boolean);
+  document.getElementById('userEmail').textContent = profileBits.join(' · ') || user.email;
   const enteredByField = document.getElementById('f_enteredby');
   const cEnteredByField = document.getElementById('c_enteredby');
-  if(!enteredByField.value) enteredByField.value = nicename;
-  if(!cEnteredByField.value) cEnteredByField.value = nicename;
+  enteredByField.value = displayName;
+  cEnteredByField.value = displayName;
+  enteredByField.readOnly = true;
+  cEnteredByField.readOnly = true;
   subscribeRealtime();
   loadAll();
 }
@@ -756,6 +786,7 @@ document.getElementById('entryForm').addEventListener('submit', async (e)=>{
   document.getElementById('f_hours').value = 0;
   document.getElementById('f_downtime').value = 0;
   document.getElementById('f_date').valueAsDate = new Date();
+  document.getElementById('f_enteredby').value = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
   pendingPhoto = null;
   document.getElementById('f_photoPreview').style.display = 'none';
   renderAll();
@@ -784,6 +815,7 @@ document.getElementById('constraintForm').addEventListener('submit', async (e)=>
   showToast('Constraint added to register.');
   e.target.reset();
   document.getElementById('c_date').valueAsDate = new Date();
+  document.getElementById('c_enteredby').value = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
   renderAll();
 });
 
@@ -896,7 +928,8 @@ function renderKpView(){
   for(let i=0;i<=5;i++){
     const kp = Math.round(step*i);
     const pct = (kp/corridorLength)*100;
-    axisHtml += `<div class="tickline" style="left:${pct}%"></div><div class="tick" style="left:${pct}%">KP ${kp}</div>`;
+    const edgeClass = i===0 ? ' tick-first' : i===5 ? ' tick-last' : '';
+    axisHtml += `<div class="tickline" style="left:${pct}%"></div><div class="tick${edgeClass}" style="left:${pct}%">KP ${kp}</div>`;
   }
   axisEl.innerHTML = axisHtml;
 
