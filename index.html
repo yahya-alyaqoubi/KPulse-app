@@ -53,7 +53,22 @@
   .grid{display:grid;gap:16px;}
   .cols-2{grid-template-columns:1.15fr .85fr;}
   .cols-4{grid-template-columns:repeat(4,1fr);}
-  @media (max-width:820px){.cols-2,.cols-4{grid-template-columns:1fr;}}
+  @media (max-width:820px){.cols-2{grid-template-columns:1fr;} .cols-4{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:480px){.cols-4{grid-template-columns:1fr;}}
+  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  @media (max-width:600px){
+    .app{padding:0 14px 40px;}
+    .card{padding:16px;}
+    .row2,.row3{grid-template-columns:1fr;}
+    nav.tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    nav.tabs button{flex:none;white-space:nowrap;padding:12px 16px;}
+    .brand{flex-wrap:wrap;row-gap:10px;}
+    table{font-size:11.5px;}
+    th,td{padding:7px 8px;}
+  }
+  @media (max-width:420px){
+    .userbox span{display:none;}
+  }
 
   .card{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:20px;}
   .card h2{font-size:16px;margin:0 0 4px;color:var(--navy);}
@@ -250,7 +265,25 @@
           <fieldset>
             <legend>Resources</legend>
             <div class="row3">
-              <div class="field"><label>Equipment</label><input type="text" id="f_equipment" placeholder="Excavator"></div>
+              <div class="field"><label>Equipment</label>
+                <input type="text" id="f_equipment" list="equipmentOptions" placeholder="Select or type...">
+                <datalist id="equipmentOptions">
+                  <option value="Excavator">
+                  <option value="Backhoe Loader">
+                  <option value="Bulldozer">
+                  <option value="Dump Truck">
+                  <option value="Compactor / Roller">
+                  <option value="Mobile Crane">
+                  <option value="Wheel Loader">
+                  <option value="Motor Grader">
+                  <option value="Trencher">
+                  <option value="Water Tanker">
+                  <option value="Generator">
+                  <option value="Welding Machine">
+                  <option value="Pipe Layer / Side Boom">
+                  <option value="Padding Machine">
+                </datalist>
+              </div>
               <div class="field"><label>Equipment ID</label><input type="text" id="f_equipid" placeholder="EXC-14"></div>
               <div class="field"><label>Working Hours</label><input type="number" id="f_hours" value="0"></div>
             </div>
@@ -294,6 +327,12 @@
           </div>
           <div class="field"><label>Filter: Entered By</label>
             <select id="filterUser"><option value="">Everyone</option></select>
+          </div>
+          <div class="field"><label>Filter: Year</label>
+            <select id="filterYear"><option value="">All Years</option></select>
+          </div>
+          <div class="field"><label>Filter: Month</label>
+            <select id="filterMonth"><option value="">All Months</option></select>
           </div>
         </div>
         <div id="recentEntries"><div class="empty">No entries yet. Submit the form to get started.</div></div>
@@ -754,6 +793,8 @@ document.getElementById('applyCorridor').addEventListener('click', ()=>{
 });
 document.getElementById('filterTeam').addEventListener('change', renderRecentEntries);
 document.getElementById('filterUser').addEventListener('change', renderRecentEntries);
+document.getElementById('filterYear').addEventListener('change', renderRecentEntries);
+document.getElementById('filterMonth').addEventListener('change', renderRecentEntries);
 
 // ---------- render ----------
 function renderAll(){
@@ -763,11 +804,22 @@ function renderAll(){
   renderConstraintTable();
 }
 
+const MONTH_NAMES = [['01','January'],['02','February'],['03','March'],['04','April'],['05','May'],['06','June'],['07','July'],['08','August'],['09','September'],['10','October'],['11','November'],['12','December']];
+
 function populateUserFilter(){
   const sel = document.getElementById('filterUser');
   const current = sel.value;
   const names = Array.from(new Set(entries.map(e=>e.enteredBy).filter(Boolean))).sort();
   sel.innerHTML = '<option value="">Everyone</option>' + names.map(n=>`<option${n===current?' selected':''}>${n}</option>`).join('');
+
+  const yearSel = document.getElementById('filterYear');
+  const yearCurrent = yearSel.value;
+  const years = Array.from(new Set(entries.map(e=>e.date && e.date.slice(0,4)).filter(Boolean))).sort().reverse();
+  yearSel.innerHTML = '<option value="">All Years</option>' + years.map(y=>`<option${y===yearCurrent?' selected':''}>${y}</option>`).join('');
+
+  const monthSel = document.getElementById('filterMonth');
+  const monthCurrent = monthSel.value;
+  monthSel.innerHTML = '<option value="">All Months</option>' + MONTH_NAMES.map(([v,n])=>`<option value="${v}"${v===monthCurrent?' selected':''}>${n}</option>`).join('');
 }
 
 function renderRecentEntries(){
@@ -775,15 +827,20 @@ function renderRecentEntries(){
   const el = document.getElementById('recentEntries');
   const teamFilter = document.getElementById('filterTeam').value;
   const userFilter = document.getElementById('filterUser').value;
+  const yearFilter = document.getElementById('filterYear').value;
+  const monthFilter = document.getElementById('filterMonth').value;
   let filtered = entries.filter(en =>
-    (!teamFilter || en.team===teamFilter) && (!userFilter || en.enteredBy===userFilter)
+    (!teamFilter || en.team===teamFilter) &&
+    (!userFilter || en.enteredBy===userFilter) &&
+    (!yearFilter || (en.date && en.date.slice(0,4)===yearFilter)) &&
+    (!monthFilter || (en.date && en.date.slice(5,7)===monthFilter))
   );
   if(filtered.length===0){ el.innerHTML = '<div class="empty">No entries match this filter.</div>'; return; }
-  let html = '<table><thead><tr><th>Date</th><th>Entered By</th><th>Activity</th><th>KP</th><th>Actual</th></tr></thead><tbody>';
+  let html = '<div class="tablewrap"><table><thead><tr><th>Date</th><th>Entered By</th><th>Activity</th><th>KP</th><th>Actual</th></tr></thead><tbody>';
   filtered.slice(0,25).forEach(en=>{
     html += `<tr class="clickable" data-id="${en.id}"><td>${en.date||'-'}</td><td>${en.enteredBy||'—'}</td><td>${en.activity}</td><td>${en.kpFrom}–${en.kpTo}</td><td>${en.actual} ${en.unit}</td></tr>`;
   });
-  html += '</tbody></table>';
+  html += '</tbody></table></div>';
   if(filtered.length>25) html += `<p class="footnote">Showing 25 of ${filtered.length} matching entries.</p>`;
   el.innerHTML = html;
   el.querySelectorAll('tr[data-id]').forEach(row=>{
@@ -822,12 +879,12 @@ function renderDashboard(){
   const openList = constraints.filter(c=>c.status!=='Closed').slice(0,6);
   if(openList.length===0){ dashConEl.innerHTML = '<div class="empty">No open constraints.</div>'; }
   else{
-    let html = '<table><thead><tr><th>KP</th><th>Category</th><th>Priority</th></tr></thead><tbody>';
+    let html = '<div class="tablewrap"><table><thead><tr><th>KP</th><th>Category</th><th>Priority</th></tr></thead><tbody>';
     openList.forEach(c=>{
       const pillClass = c.priority==='High' ? 'red' : c.priority==='Medium' ? 'amber' : 'green';
       html += `<tr><td>${c.kp}</td><td>${c.category}</td><td><span class="pill ${pillClass}">${c.priority}</span></td></tr>`;
     });
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     dashConEl.innerHTML = html;
   }
 }
@@ -859,12 +916,12 @@ function renderKpView(){
 function renderConstraintTable(){
   const el = document.getElementById('constraintTable');
   if(constraints.length===0){ el.innerHTML = '<div class="empty">No constraints logged yet.</div>'; return; }
-  let html = '<table><thead><tr><th>Date</th><th>KP</th><th>Category</th><th>Priority</th><th>Status</th></tr></thead><tbody>';
+  let html = '<div class="tablewrap"><table><thead><tr><th>Date</th><th>KP</th><th>Category</th><th>Priority</th><th>Status</th></tr></thead><tbody>';
   constraints.forEach(c=>{
     const pillClass = c.status==='Open' ? 'red' : c.status==='In Progress' ? 'amber' : 'green';
     html += `<tr class="clickable" data-id="${c.id}"><td>${c.date||'-'}</td><td>${c.kp}</td><td>${c.category}</td><td>${c.priority}</td><td><span class="pill ${pillClass}">${c.status}</span></td></tr>`;
   });
-  html += '</tbody></table>';
+  html += '</tbody></table></div>';
   el.innerHTML = html;
   el.querySelectorAll('tr[data-id]').forEach(row=>{
     row.addEventListener('click', ()=>{
