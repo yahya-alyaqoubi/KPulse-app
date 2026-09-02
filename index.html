@@ -505,13 +505,13 @@ function onSignedOut(){
   document.getElementById('authForm').reset();
 }
 
-async function initAuth(){
+function initAuth(){
   if(!isConfigured()){
     document.getElementById('setupHint').textContent = 'Setup needed: add your Supabase URL and anon key in index.html before signing in.';
     return;
   }
-  const { data: { session } } = await sb.auth.getSession();
-  if(session) onSignedIn(session.user); else onSignedOut();
+  // onAuthStateChange fires once immediately with the current session
+  // (restored from storage) and again on every sign-in/sign-out.
   sb.auth.onAuthStateChange((_event, session)=>{
     if(session) onSignedIn(session.user); else onSignedOut();
   });
