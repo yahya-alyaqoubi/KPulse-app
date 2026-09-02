@@ -114,6 +114,7 @@
   .pill.green{background:var(--green-bg);color:var(--green);}
   .pill.amber{background:var(--amber-bg);color:var(--amber);}
   .pill.red{background:var(--red-bg);color:var(--red);}
+  .pill.gray{background:var(--line);color:var(--mute);}
 
   .kpaxis{position:relative;height:26px;border-bottom:1px solid var(--line);margin:6px 0 14px;}
   .kpaxis .tick{position:absolute;top:0;font-size:10px;color:var(--mute);white-space:nowrap;transform:translateX(-50%);}
@@ -346,6 +347,7 @@
           <div class="field"><label>Filter: Month</label>
             <select id="filterMonth"><option value="">All Months</option></select>
           </div>
+          <div class="field" style="flex:none;"><label>&nbsp;</label><button type="button" class="ghost" id="exportEntriesBtn">Export to Excel</button></div>
         </div>
         <div id="recentEntries"><div class="empty">No entries yet. Submit the form to get started.</div></div>
       </div>
@@ -436,6 +438,9 @@
       <div class="card">
         <h2>Constraint Register</h2>
         <p class="sub">Shared live with your team.</p>
+        <div class="toolbar">
+          <div class="field" style="flex:none;"><button type="button" class="ghost" id="exportConstraintsBtn">Export to Excel</button></div>
+        </div>
         <div id="constraintTable"><div class="empty">No constraints logged yet.</div></div>
       </div>
     </div>
@@ -453,6 +458,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // =====================================================================
 // SUPABASE SETUP — fill these in after creating your Supabase project
@@ -562,7 +568,7 @@ function onSignedIn(user){
   enteredByField.readOnly = true;
   cEnteredByField.readOnly = true;
   subscribeRealtime();
-  loadAll();
+  loadAll().then(trySyncPending);
 }
 function onSignedOut(){
   currentUser = null;
@@ -599,6 +605,10 @@ function subscribeRealtime(){
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'entries' }, (payload)=>{
       const idx = entries.findIndex(e=>e.id===payload.new.id);
       if(idx>-1){ entries[idx] = rowToEntry(payload.new); renderAll(); }
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'entries' }, (payload)=>{
+      entries = entries.filter(e=>e.id!==payload.old.id);
+      renderAll();
     }).subscribe();
   const constraintsCh = sb.channel('public:constraints')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'constraints' }, (payload)=>{
@@ -610,6 +620,10 @@ function subscribeRealtime(){
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'constraints' }, (payload)=>{
       const idx = constraints.findIndex(c=>c.id===payload.new.id);
       if(idx>-1){ constraints[idx] = rowToConstraint(payload.new); renderAll(); }
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'constraints' }, (payload)=>{
+      constraints = constraints.filter(c=>c.id!==payload.old.id);
+      renderAll();
     }).subscribe();
   realtimeChannels = [entriesCh, constraintsCh];
 }
@@ -664,7 +678,7 @@ function closeModal(){ document.getElementById('modalOverlay').classList.remove(
 document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='modalOverlay') closeModal(); });
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
 
-function canEditRow(row){ return currentUser && row.userId === currentUser.id; }
+function canEditRow(row){ return currentUser && row.userId === currentUser.id && !row.pending; }
 
 function openEntryModal(entry){
   let html = `<h3>Daily Entry — ${entry.activity} · KP ${entry.kpFrom}–${entry.kpTo}</h3><div class="detail-grid">`;
@@ -683,11 +697,27 @@ function openEntryModal(entry){
   html += `<div class="detail-full"><div class="dlabel">Remarks</div><div class="dval">${entry.remarks||'—'}</div></div>`;
   html += '</div>';
   if(entry.photo){ html += `<img class="modal-photo" src="${entry.photo}" alt="Site photo">`; }
-  if(canEditRow(entry)){ html += '<button type="button" class="ghost" id="editEntryBtn" style="margin-top:16px;">Edit Entry</button>'; }
+  if(canEditRow(entry)){
+    html += '<div style="margin-top:16px;display:flex;gap:10px;">';
+    html += '<button type="button" class="ghost" id="editEntryBtn">Edit Entry</button>';
+    html += '<button type="button" class="ghost" id="deleteEntryBtn" style="color:var(--red);border-color:var(--red-bg);">Delete Entry</button>';
+    html += '</div>';
+  }
   openModal(html);
   if(canEditRow(entry)){
     document.getElementById('editEntryBtn').addEventListener('click', ()=> openEntryEditForm(entry));
+    document.getElementById('deleteEntryBtn').addEventListener('click', ()=> deleteEntry(entry));
   }
+}
+
+async function deleteEntry(entry){
+  if(!confirm('Delete this entry? This cannot be undone.')) return;
+  const { error } = await sb.from('entries').delete().eq('id', entry.id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  entries = entries.filter(e=>e.id!==entry.id);
+  closeModal();
+  showToast('Entry deleted.');
+  renderAll();
 }
 
 function openEntryEditForm(entry){
@@ -806,11 +836,27 @@ function openConstraintModal(c){
   ];
   rows.forEach(r=>{ html += `<div><div class="dlabel">${r[0]}</div><div class="dval">${r[1]}</div></div>`; });
   html += `<div class="detail-full"><div class="dlabel">Description</div><div class="dval">${c.description||'—'}</div></div></div>`;
-  if(canEditRow(c)){ html += '<button type="button" class="ghost" id="editConstraintBtn" style="margin-top:16px;">Edit Constraint</button>'; }
+  if(canEditRow(c)){
+    html += '<div style="margin-top:16px;display:flex;gap:10px;">';
+    html += '<button type="button" class="ghost" id="editConstraintBtn">Edit Constraint</button>';
+    html += '<button type="button" class="ghost" id="deleteConstraintBtn" style="color:var(--red);border-color:var(--red-bg);">Delete Constraint</button>';
+    html += '</div>';
+  }
   openModal(html);
   if(canEditRow(c)){
     document.getElementById('editConstraintBtn').addEventListener('click', ()=> openConstraintEditForm(c));
+    document.getElementById('deleteConstraintBtn').addEventListener('click', ()=> deleteConstraint(c));
   }
+}
+
+async function deleteConstraint(c){
+  if(!confirm('Delete this constraint? This cannot be undone.')) return;
+  const { error } = await sb.from('constraints').delete().eq('id', c.id);
+  if(error){ showToast('Could not delete: ' + error.message); return; }
+  constraints = constraints.filter(x=>x.id!==c.id);
+  closeModal();
+  showToast('Constraint deleted.');
+  renderAll();
 }
 
 function openConstraintEditForm(c){
@@ -924,8 +970,64 @@ async function loadAll(){
   if(e2){ showToast('Could not load constraints: ' + e2.message); }
   constraints = (consData || []).map(rowToConstraint);
 
+  loadPending().forEach(item=>{
+    if(item.type==='entry') entries.unshift(item.display);
+    else constraints.unshift(item.display);
+  });
+
   renderAll();
 }
+
+// ---------- offline queue (weak/no connection fallback) ----------
+const PENDING_KEY = 'kpulse:pendingSync';
+function loadPending(){
+  try{ return JSON.parse(localStorage.getItem(PENDING_KEY)) || []; }catch(err){ return []; }
+}
+function savePending(list){
+  try{ localStorage.setItem(PENDING_KEY, JSON.stringify(list)); }catch(err){}
+}
+function queuePending(type, row, display){
+  const list = loadPending();
+  list.push({ localId: display.id, type, row, display, createdAt: Date.now() });
+  savePending(list);
+}
+function removePendingByLocalId(localId){
+  savePending(loadPending().filter(p=>p.localId!==localId));
+}
+function isNetworkError(err){
+  return err instanceof TypeError || /fetch|network/i.test((err && err.message) || '');
+}
+
+async function trySyncPending(){
+  if(!currentUser) return;
+  const list = loadPending();
+  for(const item of list){
+    try{
+      const table = item.type==='entry' ? 'entries' : 'constraints';
+      const { data, error } = await sb.from(table).insert(item.row).select().single();
+      if(error){
+        removePendingByLocalId(item.localId);
+        showToast('A pending item failed to sync and was dropped: ' + error.message);
+        continue;
+      }
+      removePendingByLocalId(item.localId);
+      if(item.type==='entry'){
+        const idx = entries.findIndex(e=>e.id===item.localId);
+        const fresh = rowToEntry(data);
+        if(idx>-1) entries[idx] = fresh; else entries.unshift(fresh);
+      } else {
+        const idx = constraints.findIndex(c=>c.id===item.localId);
+        const fresh = rowToConstraint(data);
+        if(idx>-1) constraints[idx] = fresh; else constraints.unshift(fresh);
+      }
+      renderAll();
+      showToast('Synced a pending item.');
+    }catch(err){
+      break; // still offline — stop and retry on the next 'online' event
+    }
+  }
+}
+window.addEventListener('online', trySyncPending);
 
 // ---------- tabs ----------
 document.querySelectorAll('nav.tabs button').forEach(btn=>{
@@ -968,22 +1070,49 @@ document.getElementById('entryForm').addEventListener('submit', async (e)=>{
   };
   const btn = document.getElementById('entrySubmitBtn');
   btn.disabled = true;
-  const { data, error } = await sb.from('entries').insert(entryToRow(entry)).select().single();
-  btn.disabled = false;
-  if(error){ showToast('Could not save: ' + error.message); return; }
-  entries.unshift(rowToEntry(data));
-  showToast('Daily entry saved.');
-  e.target.reset();
-  document.getElementById('f_planned').value = 0;
-  document.getElementById('f_actual').value = 0;
-  document.getElementById('f_manpower').value = 0;
-  document.getElementById('f_hours').value = 0;
-  document.getElementById('f_downtime').value = 0;
-  document.getElementById('f_date').valueAsDate = new Date();
-  document.getElementById('f_enteredby').value = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
-  pendingPhoto = null;
-  document.getElementById('f_photoPreview').style.display = 'none';
-  renderAll();
+  const row = entryToRow(entry);
+
+  function afterSave(){
+    btn.disabled = false;
+    e.target.reset();
+    document.getElementById('f_planned').value = 0;
+    document.getElementById('f_actual').value = 0;
+    document.getElementById('f_manpower').value = 0;
+    document.getElementById('f_hours').value = 0;
+    document.getElementById('f_downtime').value = 0;
+    document.getElementById('f_date').valueAsDate = new Date();
+    document.getElementById('f_enteredby').value = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+    pendingPhoto = null;
+    document.getElementById('f_photoPreview').style.display = 'none';
+    renderAll();
+  }
+
+  if(!navigator.onLine){
+    const display = { ...entry, id: 'local_'+Date.now(), userId: currentUser.id, pending: true };
+    queuePending('entry', row, display);
+    entries.unshift(display);
+    showToast('No connection — saved locally, will sync automatically.');
+    afterSave();
+    return;
+  }
+  try{
+    const { data, error } = await sb.from('entries').insert(row).select().single();
+    if(error){ btn.disabled = false; showToast('Could not save: ' + error.message); return; }
+    entries.unshift(rowToEntry(data));
+    showToast('Daily entry saved.');
+    afterSave();
+  }catch(err){
+    if(isNetworkError(err)){
+      const display = { ...entry, id: 'local_'+Date.now(), userId: currentUser.id, pending: true };
+      queuePending('entry', row, display);
+      entries.unshift(display);
+      showToast('Connection lost — saved locally, will sync automatically.');
+      afterSave();
+    } else {
+      btn.disabled = false;
+      showToast('Could not save: ' + (err.message || 'Unknown error'));
+    }
+  }
 });
 
 // ---------- constraint form ----------
@@ -1002,15 +1131,42 @@ document.getElementById('constraintForm').addEventListener('submit', async (e)=>
   };
   const btn = document.getElementById('constraintSubmitBtn');
   btn.disabled = true;
-  const { data, error } = await sb.from('constraints').insert(constraintToRow(c)).select().single();
-  btn.disabled = false;
-  if(error){ showToast('Could not save: ' + error.message); return; }
-  constraints.unshift(rowToConstraint(data));
-  showToast('Constraint added to register.');
-  e.target.reset();
-  document.getElementById('c_date').valueAsDate = new Date();
-  document.getElementById('c_enteredby').value = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
-  renderAll();
+  const row = constraintToRow(c);
+
+  function afterSave(){
+    btn.disabled = false;
+    e.target.reset();
+    document.getElementById('c_date').valueAsDate = new Date();
+    document.getElementById('c_enteredby').value = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+    renderAll();
+  }
+
+  if(!navigator.onLine){
+    const display = { ...c, id: 'local_'+Date.now(), userId: currentUser.id, pending: true };
+    queuePending('constraint', row, display);
+    constraints.unshift(display);
+    showToast('No connection — saved locally, will sync automatically.');
+    afterSave();
+    return;
+  }
+  try{
+    const { data, error } = await sb.from('constraints').insert(row).select().single();
+    if(error){ btn.disabled = false; showToast('Could not save: ' + error.message); return; }
+    constraints.unshift(rowToConstraint(data));
+    showToast('Constraint added to register.');
+    afterSave();
+  }catch(err){
+    if(isNetworkError(err)){
+      const display = { ...c, id: 'local_'+Date.now(), userId: currentUser.id, pending: true };
+      queuePending('constraint', row, display);
+      constraints.unshift(display);
+      showToast('Connection lost — saved locally, will sync automatically.');
+      afterSave();
+    } else {
+      btn.disabled = false;
+      showToast('Could not save: ' + (err.message || 'Unknown error'));
+    }
+  }
 });
 
 document.getElementById('applyCorridor').addEventListener('click', ()=>{
@@ -1048,23 +1204,28 @@ function populateUserFilter(){
   monthSel.innerHTML = '<option value="">All Months</option>' + MONTH_NAMES.map(([v,n])=>`<option value="${v}"${v===monthCurrent?' selected':''}>${n}</option>`).join('');
 }
 
-function renderRecentEntries(){
-  populateUserFilter();
-  const el = document.getElementById('recentEntries');
+function getFilteredEntries(){
   const teamFilter = document.getElementById('filterTeam').value;
   const userFilter = document.getElementById('filterUser').value;
   const yearFilter = document.getElementById('filterYear').value;
   const monthFilter = document.getElementById('filterMonth').value;
-  let filtered = entries.filter(en =>
+  return entries.filter(en =>
     (!teamFilter || en.team===teamFilter) &&
     (!userFilter || en.enteredBy===userFilter) &&
     (!yearFilter || (en.date && en.date.slice(0,4)===yearFilter)) &&
     (!monthFilter || (en.date && en.date.slice(5,7)===monthFilter))
   );
+}
+
+function renderRecentEntries(){
+  populateUserFilter();
+  const el = document.getElementById('recentEntries');
+  let filtered = getFilteredEntries();
   if(filtered.length===0){ el.innerHTML = '<div class="empty">No entries match this filter.</div>'; return; }
   let html = '<div class="tablewrap"><table><thead><tr><th>Date</th><th>Entered By</th><th>Activity</th><th>KP</th><th>Actual</th></tr></thead><tbody>';
   filtered.slice(0,25).forEach(en=>{
-    html += `<tr class="clickable" data-id="${en.id}"><td>${en.date||'-'}</td><td>${en.enteredBy||'—'}</td><td>${en.activity}</td><td>${en.kpFrom}–${en.kpTo}</td><td>${en.actual} ${en.unit}</td></tr>`;
+    const pendingPill = en.pending ? ' <span class="pill gray">Pending sync</span>' : '';
+    html += `<tr class="clickable" data-id="${en.id}"><td>${en.date||'-'}${pendingPill}</td><td>${en.enteredBy||'—'}</td><td>${en.activity}</td><td>${en.kpFrom}–${en.kpTo}</td><td>${en.actual} ${en.unit}</td></tr>`;
   });
   html += '</tbody></table></div>';
   if(filtered.length>25) html += `<p class="footnote">Showing 25 of ${filtered.length} matching entries.</p>`;
@@ -1076,6 +1237,38 @@ function renderRecentEntries(){
     });
   });
 }
+
+function exportEntriesToExcel(){
+  const rows = getFilteredEntries().map(en=>({
+    Date: en.date, 'Entered By': en.enteredBy, Team: en.team, Section: en.section,
+    'KP From': en.kpFrom, 'KP To': en.kpTo, Activity: en.activity, Unit: en.unit,
+    Planned: en.planned, Actual: en.actual, Manpower: en.manpower,
+    Equipment: en.equipment, 'Equipment ID': en.equipmentId, 'Working Hours': en.hours,
+    'Downtime (hrs)': en.downtime, 'Has Constraint': en.hasConstraint ? 'Yes' : 'No',
+    'Reason for Delay': en.reason, 'HSE Observation': en.hse, 'QA/QC Status': en.qaqc,
+    Remarks: en.remarks,
+  }));
+  if(rows.length===0){ showToast('No entries to export.'); return; }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Entries');
+  XLSX.writeFile(wb, `KPulse-Entries-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+document.getElementById('exportEntriesBtn').addEventListener('click', exportEntriesToExcel);
+
+function exportConstraintsToExcel(){
+  const rows = constraints.map(c=>({
+    Date: c.date, 'Entered By': c.enteredBy, 'KP / Location': c.kp, Activity: c.activity,
+    Category: c.category, Description: c.description, 'Responsible Party': c.responsible,
+    Priority: c.priority, Status: c.status,
+  }));
+  if(rows.length===0){ showToast('No constraints to export.'); return; }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Constraints');
+  XLSX.writeFile(wb, `KPulse-Constraints-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+document.getElementById('exportConstraintsBtn').addEventListener('click', exportConstraintsToExcel);
 
 function renderDashboard(){
   document.getElementById('kpi_entries').textContent = entries.length;
@@ -1146,7 +1339,8 @@ function renderConstraintTable(){
   let html = '<div class="tablewrap"><table><thead><tr><th>Date</th><th>KP</th><th>Category</th><th>Priority</th><th>Status</th></tr></thead><tbody>';
   constraints.forEach(c=>{
     const pillClass = c.status==='Open' ? 'red' : c.status==='In Progress' ? 'amber' : 'green';
-    html += `<tr class="clickable" data-id="${c.id}"><td>${c.date||'-'}</td><td>${c.kp}</td><td>${c.category}</td><td>${c.priority}</td><td><span class="pill ${pillClass}">${c.status}</span></td></tr>`;
+    const pendingPill = c.pending ? ' <span class="pill gray">Pending sync</span>' : '';
+    html += `<tr class="clickable" data-id="${c.id}"><td>${c.date||'-'}${pendingPill}</td><td>${c.kp}</td><td>${c.category}</td><td>${c.priority}</td><td><span class="pill ${pillClass}">${c.status}</span></td></tr>`;
   });
   html += '</tbody></table></div>';
   el.innerHTML = html;
