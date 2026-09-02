@@ -52,11 +52,15 @@ create policy "entries_select_authenticated" on public.entries
   for select to authenticated using (true);
 create policy "entries_insert_own" on public.entries
   for insert to authenticated with check (auth.uid() = user_id);
+create policy "entries_update_own" on public.entries
+  for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 create policy "constraints_select_authenticated" on public.constraints
   for select to authenticated using (true);
 create policy "constraints_insert_own" on public.constraints
   for insert to authenticated with check (auth.uid() = user_id);
+create policy "constraints_update_own" on public.constraints
+  for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- Realtime: lets the app push new entries/constraints to every open
 -- browser tab live, without refreshing.
