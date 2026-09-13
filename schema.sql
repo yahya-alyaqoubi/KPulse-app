@@ -43,10 +43,21 @@ create table if not exists public.constraints (
   status text
 );
 
+create table if not exists public.equipment (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  user_id uuid references auth.users(id),
+  code text,
+  name text,
+  status text default 'Active',
+  notes text
+);
+
 -- Row Level Security: only signed-in users can read or write, and every
 -- row must be attributed to the user who created it.
 alter table public.entries enable row level security;
 alter table public.constraints enable row level security;
+alter table public.equipment enable row level security;
 
 create policy "entries_select_authenticated" on public.entries
   for select to authenticated using (true);
@@ -66,7 +77,20 @@ create policy "constraints_update_own" on public.constraints
 create policy "constraints_delete_own" on public.constraints
   for delete to authenticated using (auth.uid() = user_id);
 
--- Realtime: lets the app push new entries/constraints to every open
--- browser tab live, without refreshing.
+-- Equipment is shared operational state (any team member can flag a
+-- machine as under maintenance), so updates are not restricted to the
+-- creator the way entries/constraints are. Only the creator can delete.
+create policy "equipment_select_authenticated" on public.equipment
+  for select to authenticated using (true);
+create policy "equipment_insert_own" on public.equipment
+  for insert to authenticated with check (auth.uid() = user_id);
+create policy "equipment_update_shared" on public.equipment
+  for update to authenticated using (true) with check (true);
+create policy "equipment_delete_own" on public.equipment
+  for delete to authenticated using (auth.uid() = user_id);
+
+-- Realtime: lets the app push new entries/constraints/equipment changes
+-- to every open browser tab live, without refreshing.
 alter publication supabase_realtime add table public.entries;
 alter publication supabase_realtime add table public.constraints;
+alter publication supabase_realtime add table public.equipment;

@@ -26,11 +26,12 @@
   html,body{overflow-x:hidden;}
   body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
   h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;}
+  html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3,html[dir="rtl"] .serif{font-family:inherit;}
   .app{max-width:1180px;margin:0 auto;padding:0 24px 60px;}
 
   header.top{background:var(--navy-dark);color:var(--white);padding:22px 0 0;margin-bottom:0;}
   header.top .app{padding-bottom:0;}
-  .brand{display:flex;align-items:center;justify-content:space-between;gap:14px;}
+  .brand{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
   .brand-left{display:flex;align-items:center;gap:14px;}
   .mark{width:40px;height:40px;border-radius:50%;background:var(--accent);position:relative;flex:none;}
   .mark::after{content:"";position:absolute;inset:11px;border-radius:50%;background:var(--navy-dark);}
@@ -40,6 +41,12 @@
   .userbox{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--ice);}
   .userbox button{background:none;border:1px solid var(--steel-lt);color:var(--ice);padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;}
   .userbox button:hover{background:rgba(255,255,255,.08);}
+  .langtoggle{display:flex;gap:0;border:1px solid var(--steel-lt);border-radius:6px;overflow:hidden;}
+  .langtoggle button{border:none;background:none;color:var(--ice);padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .langtoggle button.active{background:var(--accent);color:var(--white);}
+  .authcard .langtoggle{border-color:var(--line);margin:0 0 16px;justify-content:center;}
+  .authcard .langtoggle button{color:var(--mute);}
+  .authcard .langtoggle button.active{background:var(--accent);color:var(--white);}
   .corridor{height:2px;background:linear-gradient(90deg,var(--accent) 0%, var(--accent) 38%, #234A78 38%, #234A78 100%);margin:20px 0 0;position:relative;}
   .corridor span{position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--white);border:2px solid var(--navy-dark);}
   nav.tabs{display:flex;gap:2px;margin-top:0;background:transparent;}
@@ -68,7 +75,7 @@
     th,td{padding:7px 8px;}
   }
   @media (max-width:420px){
-    .userbox span{display:none;}
+    .userbox span.username{display:none;}
   }
 
   .card{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:20px;}
@@ -96,6 +103,7 @@
 
   table{width:100%;border-collapse:collapse;font-size:12.8px;}
   th{text-align:left;color:var(--mute);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px;padding:8px 10px;border-bottom:2px solid var(--line);}
+  html[dir="rtl"] th{text-align:right;}
   td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
   tr:last-child td{border-bottom:none;}
   .empty{color:var(--mute);font-size:13px;padding:24px 8px;text-align:center;}
@@ -122,7 +130,7 @@
   .kpaxis .tick.tick-last{left:auto!important;right:0;transform:none;}
   .kpaxis .tickline{position:absolute;bottom:0;width:1px;height:8px;background:var(--mute);}
 
-  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--white);padding:12px 20px;border-radius:8px;font-size:13.5px;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;z-index:50;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--white);padding:12px 20px;border-radius:8px;font-size:13.5px;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;z-index:50;max-width:90vw;text-align:center;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
 
   .footnote{font-size:11.5px;color:var(--mute);margin-top:10px;}
@@ -140,6 +148,7 @@
   .modal-box{background:var(--white);border-radius:10px;max-width:560px;width:100%;max-height:85vh;overflow:auto;padding:24px;position:relative;}
   .modal-box h3{margin:0 0 14px;color:var(--navy);font-size:18px;}
   .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--mute);cursor:pointer;line-height:1;}
+  html[dir="rtl"] .modal-close{right:auto;left:16px;}
   .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;font-size:13px;}
   .detail-grid .dlabel{color:var(--mute);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
   .detail-grid .dval{margin-bottom:8px;}
@@ -169,24 +178,28 @@
 <!-- AUTH SCREEN -->
 <div class="authwrap" id="authScreen">
   <div class="authcard">
+    <div class="langtoggle">
+      <button type="button" data-lang="en" class="active">EN</button>
+      <button type="button" data-lang="ar">AR</button>
+    </div>
     <div class="brand-left">
       <div class="mark"></div>
-      <div class="brandtext"><h1>KPulse</h1><p>Civil Progress, Every KP.</p></div>
+      <div class="brandtext"><h1>KPulse</h1><p data-i18n="brand.tagline">Civil Progress, Every KP.</p></div>
     </div>
     <div class="authtabs">
-      <button type="button" class="active" id="tabSignIn">Sign In</button>
-      <button type="button" id="tabSignUp">Create Account</button>
+      <button type="button" class="active" id="tabSignIn" data-i18n="auth.signIn">Sign In</button>
+      <button type="button" id="tabSignUp" data-i18n="auth.createAccount">Create Account</button>
     </div>
     <div class="authmsg" id="authMsg"></div>
     <form id="authForm">
-      <div class="field" id="signupOnlyName" hidden><label>Full Name<span class="req">*</span></label><input type="text" id="auth_fullname" placeholder="e.g. Yahya Al-Balushi" autocomplete="name"></div>
-      <div class="field"><label>Email<span class="req">*</span></label><input type="email" id="auth_email" required autocomplete="username"></div>
-      <div class="field"><label>Password<span class="req">*</span></label><input type="password" id="auth_password" required autocomplete="current-password" minlength="6"></div>
+      <div class="field" id="signupOnlyName" hidden><label data-i18n="auth.fullName">Full Name<span class="req">*</span></label><input type="text" id="auth_fullname" autocomplete="name"></div>
+      <div class="field"><label data-i18n="auth.email">Email<span class="req">*</span></label><input type="email" id="auth_email" required autocomplete="username"></div>
+      <div class="field"><label data-i18n="auth.password">Password<span class="req">*</span></label><input type="password" id="auth_password" required autocomplete="current-password" minlength="6"></div>
       <div class="row2" id="signupOnlyRow" hidden>
-        <div class="field"><label>Job Title<span class="req">*</span></label><input type="text" id="auth_jobtitle" placeholder="e.g. Civil Engineer" autocomplete="organization-title"></div>
-        <div class="field"><label>Company<span class="req">*</span></label><input type="text" id="auth_company" placeholder="e.g. Contractor Co." autocomplete="organization"></div>
+        <div class="field"><label data-i18n="auth.jobTitle">Job Title<span class="req">*</span></label><input type="text" id="auth_jobtitle" autocomplete="organization-title"></div>
+        <div class="field"><label data-i18n="auth.company">Company<span class="req">*</span></label><input type="text" id="auth_company" autocomplete="organization"></div>
       </div>
-      <button type="submit" class="primary" id="authSubmitBtn" style="width:100%;">Sign In</button>
+      <button type="submit" class="primary" id="authSubmitBtn" style="width:100%;" data-i18n="auth.signIn">Sign In</button>
     </form>
     <p class="footnote" id="setupHint"></p>
   </div>
@@ -202,22 +215,27 @@
         <div class="mark"></div>
         <div class="brandtext">
           <h1>KPulse</h1>
-          <p>Civil Progress, Every KP.</p>
+          <p data-i18n="brand.tagline">Civil Progress, Every KP.</p>
         </div>
       </div>
       <div class="userbox">
-        <span id="userEmail"></span>
-        <button type="button" id="signOutBtn">Sign Out</button>
+        <div class="langtoggle">
+          <button type="button" data-lang="en" class="active">EN</button>
+          <button type="button" data-lang="ar">AR</button>
+        </div>
+        <span id="userEmail" class="username"></span>
+        <button type="button" id="signOutBtn" data-i18n="auth.signOut">Sign Out</button>
       </div>
     </div>
   </div>
   <div class="corridor"><span style="left:0%"></span><span style="left:33%"></span><span style="left:64%"></span><span style="right:0"></span></div>
   <div class="app">
     <nav class="tabs">
-      <button data-tab="entry" class="active">Field Entry</button>
-      <button data-tab="dashboard">Dashboard</button>
-      <button data-tab="kpview">KP View</button>
-      <button data-tab="constraints">Constraints</button>
+      <button data-tab="entry" class="active" data-i18n="nav.entry">Field Entry</button>
+      <button data-tab="dashboard" data-i18n="nav.dashboard">Dashboard</button>
+      <button data-tab="kpview" data-i18n="nav.kpview">KP View</button>
+      <button data-tab="constraints" data-i18n="nav.constraints">Constraints</button>
+      <button data-tab="equipment" data-i18n="nav.equipment">Equipment</button>
     </nav>
   </div>
 </header>
@@ -229,166 +247,160 @@
   <section class="panel active" id="panel-entry">
     <div class="grid cols-2">
       <div class="card">
-        <h2>Daily Civil Field Report</h2>
-        <p class="sub">Fill once on-site. Fields mirror the current handwritten Civil daily sheet.</p>
+        <h2 data-i18n="entry.cardTitle">Daily Civil Field Report</h2>
+        <p class="sub" data-i18n="entry.cardSub">Fill once on-site. Fields mirror the current handwritten Civil daily sheet.</p>
         <form id="entryForm">
           <fieldset>
-            <legend>Location &amp; Identity</legend>
+            <legend data-i18n="entry.legendLocation">Location &amp; Identity</legend>
             <div class="row2">
-              <div class="field"><label>Entered By (your name)</label><input type="text" id="f_enteredby" required>
-                <p class="fieldhint">Auto-filled from your account</p></div>
-              <div class="field"><label>Date<span class="req">*</span></label><input type="date" id="f_date" required></div>
+              <div class="field"><label data-i18n="entry.enteredBy">Entered By (your name)</label><input type="text" id="f_enteredby" required>
+                <p class="fieldhint" data-i18n="entry.autoFilled">Auto-filled from your account</p></div>
+              <div class="field"><label data-i18n="entry.date">Date<span class="req">*</span></label><input type="date" id="f_date" required></div>
             </div>
             <div class="row3">
-              <div class="field"><label>Team / Spread</label>
+              <div class="field"><label data-i18n="entry.team">Team / Spread</label>
                 <select id="f_team"><option>Fahud</option><option>Dhank</option></select>
               </div>
-              <div class="field"><label>Section</label>
+              <div class="field"><label data-i18n="entry.section">Section</label>
                 <select id="f_section"><option>SP1</option><option>SP2</option><option>SP3</option></select>
               </div>
               <div class="field"><label>&nbsp;</label></div>
             </div>
             <div class="row2">
-              <div class="field"><label>KP From<span class="req">*</span></label><input type="number" step="0.001" id="f_kpfrom" placeholder="e.g. 24.300" required></div>
-              <div class="field"><label>KP To<span class="req">*</span></label><input type="number" step="0.001" id="f_kpto" placeholder="e.g. 25.100" required></div>
+              <div class="field"><label data-i18n="entry.kpFrom">KP From<span class="req">*</span></label><input type="number" step="0.001" id="f_kpfrom" placeholder="e.g. 24.300" required></div>
+              <div class="field"><label data-i18n="entry.kpTo">KP To<span class="req">*</span></label><input type="number" step="0.001" id="f_kpto" placeholder="e.g. 25.100" required></div>
             </div>
           </fieldset>
 
           <fieldset>
-            <legend>Activity &amp; Quantities</legend>
+            <legend data-i18n="entry.legendActivity">Activity &amp; Quantities</legend>
             <div class="row2">
-              <div class="field"><label>Activity</label>
+              <div class="field"><label data-i18n="entry.activity">Activity</label>
                 <select id="f_activity">
                   <option>ROW</option><option>Trenching</option><option>Excavation</option>
                   <option>Pre-Padding</option><option>Post-Padding</option><option>Backfilling</option>
                   <option>Re-Excavation</option><option>Cleaning</option><option>Dewatering</option>
                 </select>
               </div>
-              <div class="field"><label>Unit</label>
+              <div class="field"><label data-i18n="entry.unit">Unit</label>
                 <select id="f_unit"><option>m</option><option>m3</option></select>
               </div>
             </div>
             <div class="row3">
-              <div class="field"><label>Planned Qty</label><input type="number" id="f_planned" value="0"></div>
-              <div class="field"><label>Actual Qty</label><input type="number" id="f_actual" value="0"></div>
-              <div class="field"><label>Manpower</label><input type="number" id="f_manpower" value="0"></div>
+              <div class="field"><label data-i18n="entry.planned">Planned Qty</label><input type="number" id="f_planned" value="0"></div>
+              <div class="field"><label data-i18n="entry.actual">Actual Qty</label><input type="number" id="f_actual" value="0"></div>
+              <div class="field"><label data-i18n="entry.manpower">Manpower</label><input type="number" id="f_manpower" value="0"></div>
             </div>
           </fieldset>
 
           <fieldset>
-            <legend>Resources</legend>
+            <legend data-i18n="entry.legendResources">Resources</legend>
             <div class="row3">
-              <div class="field"><label>Equipment</label>
-                <input type="text" id="f_equipment" list="equipmentOptions" placeholder="Select or type...">
-                <datalist id="equipmentOptions">
-                  <option value="Excavator">
-                  <option value="Backhoe Loader">
-                  <option value="Bulldozer">
-                  <option value="Dump Truck">
-                  <option value="Compactor / Roller">
-                  <option value="Mobile Crane">
-                  <option value="Wheel Loader">
-                  <option value="Motor Grader">
-                  <option value="Trencher">
-                  <option value="Water Tanker">
-                  <option value="Generator">
-                  <option value="Welding Machine">
-                  <option value="Pipe Layer / Side Boom">
-                  <option value="Padding Machine">
-                </datalist>
+              <div class="field"><label data-i18n="entry.equipment">Equipment</label>
+                <input type="text" id="f_equipment" list="equipmentOptions" data-i18n-ph="entry.equipmentPlaceholder" placeholder="Select or type...">
+                <datalist id="equipmentOptions"></datalist>
               </div>
-              <div class="field"><label>Equipment ID</label><input type="text" id="f_equipid" placeholder="EXC-14"></div>
-              <div class="field"><label>Working Hours</label><input type="number" id="f_hours" value="0"></div>
+              <div class="field"><label data-i18n="entry.equipmentId">Equipment ID</label><input type="text" id="f_equipid" list="equipmentIdOptions" placeholder="EXC-14"><datalist id="equipmentIdOptions"></datalist></div>
+              <div class="field"><label data-i18n="entry.workingHours">Working Hours</label><input type="number" id="f_hours" value="0"></div>
             </div>
-            <div class="field"><label>Downtime (hrs)</label><input type="number" id="f_downtime" value="0"></div>
+            <div class="field"><label data-i18n="entry.downtime">Downtime (hrs)</label><input type="number" id="f_downtime" value="0"></div>
           </fieldset>
 
           <fieldset>
-            <legend>Issues &amp; Quality</legend>
+            <legend data-i18n="entry.legendIssues">Issues &amp; Quality</legend>
             <div class="field">
-              <label><input type="checkbox" id="f_hasconstraint" style="width:auto;display:inline-block;vertical-align:middle;margin-right:6px;">This entry has a constraint / stoppage</label>
+              <label><input type="checkbox" id="f_hasconstraint" style="width:auto;display:inline-block;vertical-align:middle;margin-right:6px;"><span data-i18n="entry.hasConstraint">This entry has a constraint / stoppage</span></label>
             </div>
-            <div class="field"><label>Reason for Delay (if any)</label><input type="text" id="f_reason" placeholder="e.g. water accumulation"></div>
+            <div class="field"><label data-i18n="entry.reason">Reason for Delay (if any)</label><input type="text" id="f_reason" placeholder="e.g. water accumulation"></div>
             <div class="row2">
-              <div class="field"><label>HSE Observation</label><input type="text" id="f_hse" placeholder="None"></div>
-              <div class="field"><label>QA/QC Status</label>
+              <div class="field"><label data-i18n="entry.hse">HSE Observation</label><input type="text" id="f_hse" placeholder="None"></div>
+              <div class="field"><label data-i18n="entry.qaqc">QA/QC Status</label>
                 <select id="f_qaqc"><option>Pending</option><option>Approved</option><option>Rejected</option></select>
               </div>
             </div>
           </fieldset>
 
           <fieldset>
-            <legend>Evidence</legend>
-            <div class="field"><label>Remarks</label><textarea id="f_remarks" rows="2" placeholder="Site notes..."></textarea></div>
+            <legend data-i18n="entry.legendEvidence">Evidence</legend>
+            <div class="field"><label data-i18n="entry.remarks">Remarks</label><textarea id="f_remarks" rows="2" placeholder="Site notes..."></textarea></div>
             <div class="field">
-              <label>Photo (optional)</label>
+              <label data-i18n="entry.photoOptional">Photo (optional)</label>
               <input type="file" id="f_photo" accept="image/*">
               <img id="f_photoPreview" class="photo-preview">
             </div>
           </fieldset>
 
-          <button type="submit" class="primary" id="entrySubmitBtn">Save Daily Entry</button>
+          <button type="submit" class="primary" id="entrySubmitBtn" data-i18n="entry.save">Save Daily Entry</button>
         </form>
       </div>
 
       <div class="card">
-        <h2>Entries</h2>
-        <p class="sub">Shared live with your team. Click any row to view full details.</p>
+        <h2 data-i18n="entries.cardTitle">Entries</h2>
+        <p class="sub" data-i18n="entries.cardSub">Shared live with your team. Click any row to view full details.</p>
         <div class="toolbar">
-          <div class="field"><label>Filter: Team</label>
-            <select id="filterTeam"><option value="">All Teams</option><option>Fahud</option><option>Dhank</option></select>
+          <div class="field"><label data-i18n="entries.filterTeam">Filter: Team</label>
+            <select id="filterTeam"><option value="" data-i18n="entries.allTeams">All Teams</option><option>Fahud</option><option>Dhank</option></select>
           </div>
-          <div class="field"><label>Filter: Entered By</label>
-            <select id="filterUser"><option value="">Everyone</option></select>
+          <div class="field"><label data-i18n="entries.filterUser">Filter: Entered By</label>
+            <select id="filterUser"><option value="" data-i18n="entries.everyone">Everyone</option></select>
           </div>
-          <div class="field"><label>Filter: Year</label>
-            <select id="filterYear"><option value="">All Years</option></select>
+          <div class="field"><label data-i18n="entries.filterYear">Filter: Year</label>
+            <select id="filterYear"><option value="" data-i18n="entries.allYears">All Years</option></select>
           </div>
-          <div class="field"><label>Filter: Month</label>
-            <select id="filterMonth"><option value="">All Months</option></select>
+          <div class="field"><label data-i18n="entries.filterMonth">Filter: Month</label>
+            <select id="filterMonth"><option value="" data-i18n="entries.allMonths">All Months</option></select>
           </div>
-          <div class="field" style="flex:none;"><label>&nbsp;</label><button type="button" class="ghost" id="exportEntriesBtn">Export to Excel</button></div>
+          <div class="field" style="flex:none;"><label>&nbsp;</label><button type="button" class="ghost" id="exportEntriesBtn" data-i18n="entries.exportExcel">Export to Excel</button></div>
         </div>
-        <div id="recentEntries"><div class="empty">No entries yet. Submit the form to get started.</div></div>
+        <div id="recentEntries"><div class="empty" data-i18n="entries.emptyStart">No entries yet. Submit the form to get started.</div></div>
       </div>
     </div>
   </section>
 
   <!-- DASHBOARD -->
   <section class="panel" id="panel-dashboard">
-    <div class="badge-note">Data shown here is calculated live from every entry your team has submitted.</div>
+    <div class="badge-note" data-i18n="dash.badgeNote">Data shown here is calculated live from every entry your team has submitted.</div>
     <div class="grid cols-4" style="margin-bottom:16px;">
-      <div class="kpi"><div class="num" id="kpi_entries">0</div><div class="lbl">Daily Entries Logged</div></div>
-      <div class="kpi"><div class="num orange" id="kpi_actual">0 m</div><div class="lbl">Total Actual Quantity</div></div>
-      <div class="kpi"><div class="num" id="kpi_kp">0 km</div><div class="lbl">Furthest KP Reached</div></div>
-      <div class="kpi"><div class="num orange" id="kpi_constraints">0</div><div class="lbl">Open Constraints</div></div>
+      <div class="kpi"><div class="num" id="kpi_entries">0</div><div class="lbl" data-i18n="dash.kpiEntries">Daily Entries Logged</div></div>
+      <div class="kpi"><div class="num orange" id="kpi_actual">0 m</div><div class="lbl" data-i18n="dash.kpiActual">Total Actual Quantity</div></div>
+      <div class="kpi"><div class="num" id="kpi_kp">0 km</div><div class="lbl" data-i18n="dash.kpiKP">Furthest KP Reached</div></div>
+      <div class="kpi"><div class="num orange" id="kpi_constraints">0</div><div class="lbl" data-i18n="dash.kpiConstraints">Open Constraints</div></div>
+      <div class="kpi"><div class="num" id="kpi_manpower">0</div><div class="lbl" data-i18n="dash.kpiManpower">Total Manpower Logged</div></div>
+      <div class="kpi"><div class="num" id="kpi_hours">0</div><div class="lbl" data-i18n="dash.kpiHours">Total Working Hours</div></div>
+      <div class="kpi"><div class="num orange" id="kpi_downtime">0</div><div class="lbl" data-i18n="dash.kpiDowntime">Total Downtime (hrs)</div></div>
+      <div class="kpi"><div class="num" id="kpi_active_equip">0</div><div class="lbl" data-i18n="dash.kpiActiveEquip">Active Equipment</div></div>
     </div>
-    <div class="grid cols-2">
+    <div class="grid cols-2" style="margin-bottom:16px;">
       <div class="card">
-        <h2>Progress by Activity</h2>
-        <p class="sub">Actual quantity logged per activity, all entries to date.</p>
-        <div id="dashActivity"><div class="empty">No data yet.</div></div>
+        <h2 data-i18n="dash.progressTitle">Progress by Activity</h2>
+        <p class="sub" data-i18n="dash.progressSub">Actual quantity logged per activity, all entries to date.</p>
+        <div id="dashActivity"><div class="empty" data-i18n="dash.noData">No data yet.</div></div>
       </div>
       <div class="card">
-        <h2>Open Constraints</h2>
-        <p class="sub">From the Constraint Register.</p>
-        <div id="dashConstraints"><div class="empty">No constraints logged yet.</div></div>
+        <h2 data-i18n="dash.openConsTitle">Open Constraints</h2>
+        <p class="sub" data-i18n="dash.openConsSub">From the Constraint Register.</p>
+        <div id="dashConstraints"><div class="empty" data-i18n="dash.noConstraints">No open constraints.</div></div>
       </div>
+    </div>
+    <div class="card">
+      <h2 data-i18n="dash.equipUtilTitle">Equipment Utilization</h2>
+      <p class="sub" data-i18n="dash.equipUtilSub">Total hours logged per equipment, from all field entries.</p>
+      <div id="dashEquipment"><div class="empty" data-i18n="dash.noEquipData">No equipment usage logged yet.</div></div>
     </div>
   </section>
 
   <!-- KP VIEW -->
   <section class="panel" id="panel-kpview">
     <div class="card">
-      <h2>Civil Progress Along the Corridor</h2>
-      <p class="sub">Furthest KP reported per activity, against total corridor length below.</p>
+      <h2 data-i18n="kpview.title">Civil Progress Along the Corridor</h2>
+      <p class="sub" data-i18n="kpview.sub">Furthest KP reported per activity, against total corridor length below.</p>
       <div class="row2" style="max-width:420px;margin-bottom:18px;">
-        <div class="field"><label>Corridor Length (km)</label><input type="number" id="corridorLen" value="100"></div>
-        <div class="field"><label>&nbsp;</label><button class="ghost" id="applyCorridor" type="button">Apply</button></div>
+        <div class="field"><label data-i18n="kpview.corridorLength">Corridor Length (km)</label><input type="number" id="corridorLen" value="100"></div>
+        <div class="field"><label>&nbsp;</label><button class="ghost" id="applyCorridor" type="button" data-i18n="kpview.apply">Apply</button></div>
       </div>
       <div class="kpaxis" id="kpAxis"></div>
-      <div id="kpLanes"><div class="empty">Submit field entries to see corridor progress.</div></div>
-      <p class="footnote">Approximate view: shows the furthest KP reported for each activity from submitted entries. It is not a validated survey measurement.</p>
+      <div id="kpLanes"><div class="empty" data-i18n="kpview.emptyStart">Submit field entries to see corridor progress.</div></div>
+      <p class="footnote" data-i18n="kpview.footnote">Approximate view: shows the furthest KP reported for each activity from submitted entries. It is not a validated survey measurement.</p>
     </div>
   </section>
 
@@ -396,24 +408,24 @@
   <section class="panel" id="panel-constraints">
     <div class="grid cols-2">
       <div class="card">
-        <h2>Log a Constraint</h2>
-        <p class="sub">Water, weather, access, equipment, manpower, material, design, QA/QC, HSE, client, third-party.</p>
+        <h2 data-i18n="constraints.formTitle">Log a Constraint</h2>
+        <p class="sub" data-i18n="constraints.formSub">Water, weather, access, equipment, manpower, material, design, QA/QC, HSE, client, third-party.</p>
         <form id="constraintForm">
           <div class="row2">
-            <div class="field"><label>Entered By</label><input type="text" id="c_enteredby" required>
-              <p class="fieldhint">Auto-filled from your account</p></div>
-            <div class="field"><label>Date Identified<span class="req">*</span></label><input type="date" id="c_date" required></div>
+            <div class="field"><label data-i18n="constraints.enteredBy">Entered By</label><input type="text" id="c_enteredby" required>
+              <p class="fieldhint" data-i18n="entry.autoFilled">Auto-filled from your account</p></div>
+            <div class="field"><label data-i18n="constraints.dateIdentified">Date Identified<span class="req">*</span></label><input type="date" id="c_date" required></div>
           </div>
-          <div class="field"><label>KP / Location<span class="req">*</span></label><input type="text" id="c_kp" placeholder="35+000–36+500" required></div>
+          <div class="field"><label data-i18n="constraints.kpLocation">KP / Location<span class="req">*</span></label><input type="text" id="c_kp" placeholder="35+000–36+500" required></div>
           <div class="row2">
-            <div class="field"><label>Activity Affected</label>
+            <div class="field"><label data-i18n="constraints.activityAffected">Activity Affected</label>
               <select id="c_activity">
                 <option>ROW</option><option>Trenching</option><option>Excavation</option>
                 <option>Pre-Padding</option><option>Post-Padding</option><option>Backfilling</option>
                 <option>Re-Excavation</option><option>Cleaning</option><option>Dewatering</option>
               </select>
             </div>
-            <div class="field"><label>Category</label>
+            <div class="field"><label data-i18n="constraints.category">Category</label>
               <select id="c_category">
                 <option>Water / Dewatering</option><option>Weather</option><option>Access</option>
                 <option>Equipment</option><option>Manpower</option><option>Material</option>
@@ -422,26 +434,52 @@
               </select>
             </div>
           </div>
-          <div class="field"><label>Description<span class="req">*</span></label><textarea id="c_desc" rows="2" placeholder="What is happening..." required></textarea></div>
+          <div class="field"><label data-i18n="constraints.description">Description<span class="req">*</span></label><textarea id="c_desc" rows="2" placeholder="What is happening..." required></textarea></div>
           <div class="row3">
-            <div class="field"><label>Responsible Party</label><input type="text" id="c_resp" placeholder="Civil Engineer"></div>
-            <div class="field"><label>Priority</label>
+            <div class="field"><label data-i18n="constraints.responsible">Responsible Party</label><input type="text" id="c_resp" placeholder="Civil Engineer"></div>
+            <div class="field"><label data-i18n="constraints.priority">Priority</label>
               <select id="c_priority"><option>High</option><option>Medium</option><option>Low</option></select>
             </div>
-            <div class="field"><label>Status</label>
+            <div class="field"><label data-i18n="constraints.status">Status</label>
               <select id="c_status"><option>Open</option><option>In Progress</option><option>Closed</option></select>
             </div>
           </div>
-          <button type="submit" class="primary" id="constraintSubmitBtn">Add to Register</button>
+          <button type="submit" class="primary" id="constraintSubmitBtn" data-i18n="constraints.addToRegister">Add to Register</button>
         </form>
       </div>
       <div class="card">
-        <h2>Constraint Register</h2>
-        <p class="sub">Shared live with your team.</p>
+        <h2 data-i18n="constraints.registerTitle">Constraint Register</h2>
+        <p class="sub" data-i18n="constraints.registerSub">Shared live with your team.</p>
         <div class="toolbar">
-          <div class="field" style="flex:none;"><button type="button" class="ghost" id="exportConstraintsBtn">Export to Excel</button></div>
+          <div class="field" style="flex:none;"><button type="button" class="ghost" id="exportConstraintsBtn" data-i18n="constraints.exportExcel">Export to Excel</button></div>
         </div>
-        <div id="constraintTable"><div class="empty">No constraints logged yet.</div></div>
+        <div id="constraintTable"><div class="empty" data-i18n="constraints.emptyStart">No constraints logged yet.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EQUIPMENT -->
+  <section class="panel" id="panel-equipment">
+    <div class="grid cols-2">
+      <div class="card">
+        <h2 data-i18n="equip.formTitle">Register Equipment</h2>
+        <p class="sub" data-i18n="equip.formSub">Add machinery to the shared fleet registry so it can be tracked across entries.</p>
+        <form id="equipmentForm">
+          <div class="row2">
+            <div class="field"><label data-i18n="equip.code">Code<span class="req">*</span></label><input type="text" id="q_code" placeholder="EXC-14" required></div>
+            <div class="field"><label data-i18n="equip.name">Name<span class="req">*</span></label><input type="text" id="q_name" placeholder="Excavator" required></div>
+          </div>
+          <div class="field"><label data-i18n="equip.status">Status</label>
+            <select id="q_status"><option>Active</option><option>Under Maintenance</option><option>Idle</option></select>
+          </div>
+          <div class="field"><label data-i18n="equip.notes">Notes</label><textarea id="q_notes" rows="2"></textarea></div>
+          <button type="submit" class="primary" id="equipmentSubmitBtn" data-i18n="equip.add">Add Equipment</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2 data-i18n="equip.registryTitle">Equipment Registry</h2>
+        <p class="sub" data-i18n="equip.registrySub">Shared live with your team. Click any row to update status.</p>
+        <div id="equipmentTable"><div class="empty" data-i18n="equip.emptyStart">No equipment registered yet.</div></div>
       </div>
     </div>
   </section>
@@ -472,12 +510,243 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const ACTIVITIES = ["ROW","Trenching","Excavation","Pre-Padding","Post-Padding","Backfilling","Re-Excavation","Cleaning","Dewatering"];
+const DEFAULT_EQUIPMENT_NAMES = ["Excavator","Backhoe Loader","Bulldozer","Dump Truck","Compactor / Roller","Mobile Crane","Wheel Loader","Motor Grader","Trencher","Water Tanker","Generator","Welding Machine","Pipe Layer / Side Boom","Padding Machine"];
 let entries = [];
 let constraints = [];
+let equipment = [];
 let corridorLength = 100;
 let pendingPhoto = null;
 let currentUser = null;
 let realtimeChannels = [];
+
+// =====================================================================
+// i18n — English / Arabic. Field labels, headings, buttons, table
+// headers and messages are translated. Controlled-vocabulary values
+// (Team, Activity, Unit, Category, Priority, Status, equipment names)
+// stay in English on purpose: they are stored as literal values in the
+// database and compared against in filters/exports, so translating the
+// displayed option text would desync the UI from stored/historical data.
+// =====================================================================
+const I18N = {
+  en: {
+    'brand.tagline': 'Civil Progress, Every KP.',
+    'nav.entry': 'Field Entry', 'nav.dashboard': 'Dashboard', 'nav.kpview': 'KP View',
+    'nav.constraints': 'Constraints', 'nav.equipment': 'Equipment',
+    'auth.signIn': 'Sign In', 'auth.createAccount': 'Create Account',
+    'auth.fullName': 'Full Name', 'auth.email': 'Email', 'auth.password': 'Password',
+    'auth.jobTitle': 'Job Title', 'auth.company': 'Company', 'auth.signOut': 'Sign Out',
+    'auth.setupNeeded': 'Setup needed: add your Supabase URL and anon key in index.html before signing in.',
+    'auth.notConfigured': 'Supabase is not configured yet. Edit SUPABASE_URL / SUPABASE_ANON_KEY at the top of the script in index.html.',
+    'auth.accountCreated': 'Account created. Check your email to confirm, then sign in.',
+    'entry.cardTitle': 'Daily Civil Field Report',
+    'entry.cardSub': 'Fill once on-site. Fields mirror the current handwritten Civil daily sheet.',
+    'entry.legendLocation': 'Location & Identity', 'entry.enteredBy': 'Entered By (your name)',
+    'entry.autoFilled': 'Auto-filled from your account', 'entry.date': 'Date',
+    'entry.team': 'Team / Spread', 'entry.section': 'Section', 'entry.kpFrom': 'KP From', 'entry.kpTo': 'KP To',
+    'entry.legendActivity': 'Activity & Quantities', 'entry.activity': 'Activity', 'entry.unit': 'Unit',
+    'entry.planned': 'Planned Qty', 'entry.actual': 'Actual Qty', 'entry.manpower': 'Manpower',
+    'entry.legendResources': 'Resources', 'entry.equipment': 'Equipment', 'entry.equipmentPlaceholder': 'Select or type...',
+    'entry.equipmentId': 'Equipment ID', 'entry.workingHours': 'Working Hours', 'entry.downtime': 'Downtime (hrs)',
+    'entry.legendIssues': 'Issues & Quality', 'entry.hasConstraint': 'This entry has a constraint / stoppage',
+    'entry.reason': 'Reason for Delay (if any)', 'entry.hse': 'HSE Observation', 'entry.qaqc': 'QA/QC Status',
+    'entry.legendEvidence': 'Evidence', 'entry.remarks': 'Remarks', 'entry.photoOptional': 'Photo (optional)',
+    'entry.save': 'Save Daily Entry',
+    'entries.cardTitle': 'Entries', 'entries.cardSub': 'Shared live with your team. Click any row to view full details.',
+    'entries.filterTeam': 'Filter: Team', 'entries.filterUser': 'Filter: Entered By',
+    'entries.filterYear': 'Filter: Year', 'entries.filterMonth': 'Filter: Month',
+    'entries.allTeams': 'All Teams', 'entries.everyone': 'Everyone', 'entries.allYears': 'All Years', 'entries.allMonths': 'All Months',
+    'entries.exportExcel': 'Export to Excel', 'entries.emptyStart': 'No entries yet. Submit the form to get started.',
+    'entries.noMatch': 'No entries match this filter.', 'entries.pendingSync': 'Pending sync',
+    'entries.colDate': 'Date', 'entries.colEnteredBy': 'Entered By', 'entries.colActivity': 'Activity',
+    'entries.colKP': 'KP', 'entries.colActual': 'Actual', 'entries.showingOf': 'Showing {n} of {m} matching entries.',
+    'dash.badgeNote': 'Data shown here is calculated live from every entry your team has submitted.',
+    'dash.kpiEntries': 'Daily Entries Logged', 'dash.kpiActual': 'Total Actual Quantity',
+    'dash.kpiKP': 'Furthest KP Reached', 'dash.kpiConstraints': 'Open Constraints',
+    'dash.kpiManpower': 'Total Manpower Logged', 'dash.kpiHours': 'Total Working Hours',
+    'dash.kpiDowntime': 'Total Downtime (hrs)', 'dash.kpiActiveEquip': 'Active Equipment',
+    'dash.progressTitle': 'Progress by Activity', 'dash.progressSub': 'Actual quantity logged per activity, all entries to date.',
+    'dash.noData': 'No data yet.', 'dash.openConsTitle': 'Open Constraints', 'dash.openConsSub': 'From the Constraint Register.',
+    'dash.noConstraints': 'No open constraints.', 'dash.colKP': 'KP', 'dash.colCategory': 'Category', 'dash.colPriority': 'Priority',
+    'dash.equipUtilTitle': 'Equipment Utilization', 'dash.equipUtilSub': 'Total hours logged per equipment, from all field entries.',
+    'dash.colEquipment': 'Equipment', 'dash.colCode': 'Code', 'dash.colStatus': 'Status', 'dash.colHours': 'Hours',
+    'dash.noEquipData': 'No equipment usage logged yet.',
+    'kpview.title': 'Civil Progress Along the Corridor',
+    'kpview.sub': 'Furthest KP reported per activity, against total corridor length below.',
+    'kpview.corridorLength': 'Corridor Length (km)', 'kpview.apply': 'Apply',
+    'kpview.emptyStart': 'Submit field entries to see corridor progress.',
+    'kpview.footnote': 'Approximate view: shows the furthest KP reported for each activity from submitted entries. It is not a validated survey measurement.',
+    'constraints.formTitle': 'Log a Constraint',
+    'constraints.formSub': 'Water, weather, access, equipment, manpower, material, design, QA/QC, HSE, client, third-party.',
+    'constraints.enteredBy': 'Entered By', 'constraints.dateIdentified': 'Date Identified', 'constraints.kpLocation': 'KP / Location',
+    'constraints.activityAffected': 'Activity Affected', 'constraints.category': 'Category', 'constraints.description': 'Description',
+    'constraints.responsible': 'Responsible Party', 'constraints.priority': 'Priority', 'constraints.status': 'Status',
+    'constraints.addToRegister': 'Add to Register', 'constraints.registerTitle': 'Constraint Register',
+    'constraints.registerSub': 'Shared live with your team.', 'constraints.exportExcel': 'Export to Excel',
+    'constraints.emptyStart': 'No constraints logged yet.',
+    'constraints.colDate': 'Date', 'constraints.colKP': 'KP', 'constraints.colCategory': 'Category',
+    'constraints.colPriority': 'Priority', 'constraints.colStatus': 'Status',
+    'equip.formTitle': 'Register Equipment', 'equip.formSub': 'Add machinery to the shared fleet registry so it can be tracked across entries.',
+    'equip.code': 'Code', 'equip.name': 'Name', 'equip.status': 'Status', 'equip.notes': 'Notes', 'equip.add': 'Add Equipment',
+    'equip.registryTitle': 'Equipment Registry', 'equip.registrySub': 'Shared live with your team. Click any row to update status.',
+    'equip.colCode': 'Code', 'equip.colName': 'Name', 'equip.colStatus': 'Status', 'equip.colHours': 'Hours (logged)',
+    'equip.emptyStart': 'No equipment registered yet.', 'equip.edit': 'Edit Equipment', 'equip.delete': 'Delete Equipment',
+    'equip.save': 'Save Changes',
+    'detail.enteredBy': 'Entered By', 'detail.date': 'Date', 'detail.team': 'Team / Spread', 'detail.section': 'Section',
+    'detail.activity': 'Activity', 'detail.unit': 'Unit', 'detail.planned': 'Planned Qty', 'detail.actual': 'Actual Qty',
+    'detail.manpower': 'Manpower', 'detail.equipment': 'Equipment', 'detail.equipmentId': 'Equipment ID',
+    'detail.workingHours': 'Working Hours', 'detail.downtime': 'Downtime (hrs)', 'detail.qaqc': 'QA/QC Status',
+    'detail.hasConstraint': 'Has Constraint', 'detail.reason': 'Reason for Delay', 'detail.hse': 'HSE Observation',
+    'detail.remarks': 'Remarks', 'detail.yes': 'Yes', 'detail.no': 'No', 'detail.dash': '—',
+    'detail.dateIdentified': 'Date Identified', 'detail.activityAffected': 'Activity Affected', 'detail.category': 'Category',
+    'detail.responsible': 'Responsible', 'detail.priority': 'Priority', 'detail.status': 'Status', 'detail.description': 'Description',
+    'detail.code': 'Code', 'detail.name': 'Name', 'detail.notes': 'Notes', 'detail.totalHours': 'Total Hours Logged',
+    'title.dailyEntry': 'Daily Entry — {activity} · KP {from}–{to}', 'title.editEntry': 'Edit Entry — KP {from}–{to}',
+    'title.constraint': 'Constraint — KP {kp}', 'title.editConstraint': 'Edit Constraint — KP {kp}',
+    'title.equipment': 'Equipment — {name}', 'title.editEquipment': 'Edit Equipment — {name}',
+    'btn.editEntry': 'Edit Entry', 'btn.deleteEntry': 'Delete Entry', 'btn.editConstraint': 'Edit Constraint',
+    'btn.deleteConstraint': 'Delete Constraint',
+    'toast.entrySaved': 'Daily entry saved.', 'toast.couldNotSave': 'Could not save: ',
+    'toast.entryUpdated': 'Entry updated.', 'toast.entryDeleted': 'Entry deleted.',
+    'toast.constraintAdded': 'Constraint added to register.', 'toast.constraintUpdated': 'Constraint updated.',
+    'toast.constraintDeleted': 'Constraint deleted.', 'toast.equipmentAdded': 'Equipment added.',
+    'toast.equipmentUpdated': 'Equipment updated.', 'toast.equipmentDeleted': 'Equipment deleted.',
+    'toast.noConnectionSaved': 'No connection — saved locally, will sync automatically.',
+    'toast.connectionLostSaved': 'Connection lost — saved locally, will sync automatically.',
+    'toast.synced': 'Synced a pending item.', 'toast.pendingDropped': 'A pending item failed to sync and was dropped: ',
+    'toast.couldNotLoad': 'Could not load data: ', 'toast.noEntriesExport': 'No entries to export.',
+    'toast.noConstraintsExport': 'No constraints to export.', 'toast.couldNotDelete': 'Could not delete: ',
+    'confirm.deleteEntry': 'Delete this entry? This cannot be undone.',
+    'confirm.deleteConstraint': 'Delete this constraint? This cannot be undone.',
+    'confirm.deleteEquipment': 'Delete this equipment record? This cannot be undone.',
+  },
+  ar: {
+    'brand.tagline': 'تقدم الأعمال المدنية، كل نقطة كيلومترية.',
+    'nav.entry': 'إدخال الحقل', 'nav.dashboard': 'لوحة التحكم', 'nav.kpview': 'عرض الكيلومترات',
+    'nav.constraints': 'المعوقات', 'nav.equipment': 'المعدات',
+    'auth.signIn': 'تسجيل الدخول', 'auth.createAccount': 'إنشاء حساب',
+    'auth.fullName': 'الاسم الكامل', 'auth.email': 'البريد الإلكتروني', 'auth.password': 'كلمة المرور',
+    'auth.jobTitle': 'المسمى الوظيفي', 'auth.company': 'الشركة', 'auth.signOut': 'تسجيل الخروج',
+    'auth.setupNeeded': 'الإعداد مطلوب: أضف رابط ومفتاح Supabase داخل index.html قبل تسجيل الدخول.',
+    'auth.notConfigured': 'لم يتم إعداد Supabase بعد. عدّل SUPABASE_URL و SUPABASE_ANON_KEY أعلى الكود في index.html.',
+    'auth.accountCreated': 'تم إنشاء الحساب. تحقق من بريدك الإلكتروني للتأكيد ثم سجّل الدخول.',
+    'entry.cardTitle': 'التقرير اليومي للأعمال المدنية',
+    'entry.cardSub': 'يُعبأ مرة واحدة في الموقع. الحقول تطابق الكشف اليومي الورقي الحالي.',
+    'entry.legendLocation': 'الموقع والهوية', 'entry.enteredBy': 'أدخله (اسمك)',
+    'entry.autoFilled': 'يُعبأ تلقائيًا من حسابك', 'entry.date': 'التاريخ',
+    'entry.team': 'الفريق', 'entry.section': 'القسم', 'entry.kpFrom': 'من نقطة كم', 'entry.kpTo': 'إلى نقطة كم',
+    'entry.legendActivity': 'النشاط والكميات', 'entry.activity': 'النشاط', 'entry.unit': 'الوحدة',
+    'entry.planned': 'الكمية المخططة', 'entry.actual': 'الكمية الفعلية', 'entry.manpower': 'القوى العاملة',
+    'entry.legendResources': 'الموارد', 'entry.equipment': 'المعدة', 'entry.equipmentPlaceholder': 'اختر أو اكتب...',
+    'entry.equipmentId': 'رمز المعدة', 'entry.workingHours': 'ساعات التشغيل', 'entry.downtime': 'وقت التوقف (ساعات)',
+    'entry.legendIssues': 'المشاكل والجودة', 'entry.hasConstraint': 'هذا الإدخال فيه معوق / توقف',
+    'entry.reason': 'سبب التأخير (إن وجد)', 'entry.hse': 'ملاحظة السلامة', 'entry.qaqc': 'حالة الجودة',
+    'entry.legendEvidence': 'الأدلة', 'entry.remarks': 'ملاحظات', 'entry.photoOptional': 'صورة (اختياري)',
+    'entry.save': 'حفظ التقرير اليومي',
+    'entries.cardTitle': 'الإدخالات', 'entries.cardSub': 'مشتركة مباشرة مع فريقك. اضغط أي صف لعرض التفاصيل الكاملة.',
+    'entries.filterTeam': 'تصفية: الفريق', 'entries.filterUser': 'تصفية: أدخله',
+    'entries.filterYear': 'تصفية: السنة', 'entries.filterMonth': 'تصفية: الشهر',
+    'entries.allTeams': 'كل الفرق', 'entries.everyone': 'الجميع', 'entries.allYears': 'كل السنوات', 'entries.allMonths': 'كل الأشهر',
+    'entries.exportExcel': 'تصدير إلى Excel', 'entries.emptyStart': 'لا توجد إدخالات بعد. أرسل النموذج للبدء.',
+    'entries.noMatch': 'لا توجد إدخالات مطابقة لهذا الفلتر.', 'entries.pendingSync': 'بانتظار المزامنة',
+    'entries.colDate': 'التاريخ', 'entries.colEnteredBy': 'أدخله', 'entries.colActivity': 'النشاط',
+    'entries.colKP': 'الكيلومتر', 'entries.colActual': 'الفعلي', 'entries.showingOf': 'عرض {n} من {m} إدخال مطابق.',
+    'dash.badgeNote': 'البيانات المعروضة هنا تُحسب مباشرة من كل إدخال قدمه فريقك.',
+    'dash.kpiEntries': 'التقارير اليومية المسجلة', 'dash.kpiActual': 'إجمالي الكمية الفعلية',
+    'dash.kpiKP': 'أبعد نقطة كم تم الوصول إليها', 'dash.kpiConstraints': 'المعوقات المفتوحة',
+    'dash.kpiManpower': 'إجمالي القوى العاملة المسجلة', 'dash.kpiHours': 'إجمالي ساعات التشغيل',
+    'dash.kpiDowntime': 'إجمالي وقت التوقف (ساعات)', 'dash.kpiActiveEquip': 'المعدات الشغالة',
+    'dash.progressTitle': 'التقدم حسب النشاط', 'dash.progressSub': 'الكمية الفعلية المسجلة لكل نشاط، جميع الإدخالات حتى الآن.',
+    'dash.noData': 'لا توجد بيانات بعد.', 'dash.openConsTitle': 'المعوقات المفتوحة', 'dash.openConsSub': 'من سجل المعوقات.',
+    'dash.noConstraints': 'لا توجد معوقات مفتوحة.', 'dash.colKP': 'الكيلومتر', 'dash.colCategory': 'الفئة', 'dash.colPriority': 'الأولوية',
+    'dash.equipUtilTitle': 'استخدام المعدات', 'dash.equipUtilSub': 'إجمالي الساعات المسجلة لكل معدة، من جميع إدخالات الحقل.',
+    'dash.colEquipment': 'المعدة', 'dash.colCode': 'الرمز', 'dash.colStatus': 'الحالة', 'dash.colHours': 'الساعات',
+    'dash.noEquipData': 'لا يوجد استخدام مسجل للمعدات بعد.',
+    'kpview.title': 'التقدم المدني على طول المسار',
+    'kpview.sub': 'أبعد نقطة كم تم الإبلاغ عنها لكل نشاط، مقارنة بطول المسار الكلي أدناه.',
+    'kpview.corridorLength': 'طول المسار (كم)', 'kpview.apply': 'تطبيق',
+    'kpview.emptyStart': 'أرسل إدخالات الحقل لرؤية تقدم المسار.',
+    'kpview.footnote': 'عرض تقريبي: يُظهر أبعد نقطة كم لكل نشاط من الإدخالات المرسلة. ليس قياسًا مساحيًا معتمدًا.',
+    'constraints.formTitle': 'تسجيل معوق',
+    'constraints.formSub': 'مياه، طقس، وصول، معدات، قوى عاملة، مواد، تصميم، جودة، سلامة، عميل، طرف ثالث.',
+    'constraints.enteredBy': 'أدخله', 'constraints.dateIdentified': 'تاريخ الاكتشاف', 'constraints.kpLocation': 'الكيلومتر / الموقع',
+    'constraints.activityAffected': 'النشاط المتأثر', 'constraints.category': 'الفئة', 'constraints.description': 'الوصف',
+    'constraints.responsible': 'الجهة المسؤولة', 'constraints.priority': 'الأولوية', 'constraints.status': 'الحالة',
+    'constraints.addToRegister': 'أضف إلى السجل', 'constraints.registerTitle': 'سجل المعوقات',
+    'constraints.registerSub': 'مشترك مباشرة مع فريقك.', 'constraints.exportExcel': 'تصدير إلى Excel',
+    'constraints.emptyStart': 'لا توجد معوقات مسجلة بعد.',
+    'constraints.colDate': 'التاريخ', 'constraints.colKP': 'الكيلومتر', 'constraints.colCategory': 'الفئة',
+    'constraints.colPriority': 'الأولوية', 'constraints.colStatus': 'الحالة',
+    'equip.formTitle': 'تسجيل معدة', 'equip.formSub': 'أضف الآليات إلى سجل الأسطول المشترك لتتبعها عبر الإدخالات.',
+    'equip.code': 'الرمز', 'equip.name': 'الاسم', 'equip.status': 'الحالة', 'equip.notes': 'ملاحظات', 'equip.add': 'إضافة معدة',
+    'equip.registryTitle': 'سجل المعدات', 'equip.registrySub': 'مشترك مباشرة مع فريقك. اضغط أي صف لتحديث الحالة.',
+    'equip.colCode': 'الرمز', 'equip.colName': 'الاسم', 'equip.colStatus': 'الحالة', 'equip.colHours': 'الساعات (المسجلة)',
+    'equip.emptyStart': 'لا توجد معدات مسجلة بعد.', 'equip.edit': 'تعديل المعدة', 'equip.delete': 'حذف المعدة',
+    'equip.save': 'حفظ التغييرات',
+    'detail.enteredBy': 'أدخله', 'detail.date': 'التاريخ', 'detail.team': 'الفريق', 'detail.section': 'القسم',
+    'detail.activity': 'النشاط', 'detail.unit': 'الوحدة', 'detail.planned': 'الكمية المخططة', 'detail.actual': 'الكمية الفعلية',
+    'detail.manpower': 'القوى العاملة', 'detail.equipment': 'المعدة', 'detail.equipmentId': 'رمز المعدة',
+    'detail.workingHours': 'ساعات التشغيل', 'detail.downtime': 'وقت التوقف (ساعات)', 'detail.qaqc': 'حالة الجودة',
+    'detail.hasConstraint': 'يوجد معوق', 'detail.reason': 'سبب التأخير', 'detail.hse': 'ملاحظة السلامة',
+    'detail.remarks': 'ملاحظات', 'detail.yes': 'نعم', 'detail.no': 'لا', 'detail.dash': '—',
+    'detail.dateIdentified': 'تاريخ الاكتشاف', 'detail.activityAffected': 'النشاط المتأثر', 'detail.category': 'الفئة',
+    'detail.responsible': 'المسؤول', 'detail.priority': 'الأولوية', 'detail.status': 'الحالة', 'detail.description': 'الوصف',
+    'detail.code': 'الرمز', 'detail.name': 'الاسم', 'detail.notes': 'ملاحظات', 'detail.totalHours': 'إجمالي الساعات المسجلة',
+    'title.dailyEntry': 'تقرير يومي — {activity} · كم {from}–{to}', 'title.editEntry': 'تعديل الإدخال — كم {from}–{to}',
+    'title.constraint': 'معوق — كم {kp}', 'title.editConstraint': 'تعديل المعوق — كم {kp}',
+    'title.equipment': 'معدة — {name}', 'title.editEquipment': 'تعديل المعدة — {name}',
+    'btn.editEntry': 'تعديل الإدخال', 'btn.deleteEntry': 'حذف الإدخال', 'btn.editConstraint': 'تعديل المعوق',
+    'btn.deleteConstraint': 'حذف المعوق',
+    'toast.entrySaved': 'تم حفظ التقرير اليومي.', 'toast.couldNotSave': 'تعذر الحفظ: ',
+    'toast.entryUpdated': 'تم تحديث الإدخال.', 'toast.entryDeleted': 'تم حذف الإدخال.',
+    'toast.constraintAdded': 'تمت إضافة المعوق إلى السجل.', 'toast.constraintUpdated': 'تم تحديث المعوق.',
+    'toast.constraintDeleted': 'تم حذف المعوق.', 'toast.equipmentAdded': 'تمت إضافة المعدة.',
+    'toast.equipmentUpdated': 'تم تحديث المعدة.', 'toast.equipmentDeleted': 'تم حذف المعدة.',
+    'toast.noConnectionSaved': 'لا يوجد اتصال — تم الحفظ محليًا، سيُرفع تلقائيًا عند رجوع الاتصال.',
+    'toast.connectionLostSaved': 'انقطع الاتصال — تم الحفظ محليًا، سيُرفع تلقائيًا.',
+    'toast.synced': 'تمت مزامنة عنصر معلّق.', 'toast.pendingDropped': 'فشلت مزامنة عنصر معلّق وتم حذفه: ',
+    'toast.couldNotLoad': 'تعذر تحميل البيانات: ', 'toast.noEntriesExport': 'لا توجد إدخالات للتصدير.',
+    'toast.noConstraintsExport': 'لا توجد معوقات للتصدير.', 'toast.couldNotDelete': 'تعذر الحذف: ',
+    'confirm.deleteEntry': 'حذف هذا الإدخال؟ لا يمكن التراجع عن هذا الإجراء.',
+    'confirm.deleteConstraint': 'حذف هذا المعوق؟ لا يمكن التراجع عن هذا الإجراء.',
+    'confirm.deleteEquipment': 'حذف سجل هذه المعدة؟ لا يمكن التراجع عن هذا الإجراء.',
+  }
+};
+
+let currentLang = (function(){ try{ return localStorage.getItem('kpulse:lang') || 'en'; }catch(e){ return 'en'; } })();
+
+function t(key, vars){
+  let s = (I18N[currentLang] && I18N[currentLang][key]) || (I18N.en[key]) || key;
+  if(vars) Object.keys(vars).forEach(k=>{ s = s.split('{'+k+'}').join(vars[k]); });
+  return s;
+}
+
+function applyStaticTranslations(){
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang==='ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    const reqSpan = el.querySelector('.req');
+    el.textContent = t(key);
+    if(reqSpan){ const s = document.createElement('span'); s.className='req'; s.textContent='*'; el.appendChild(s); }
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    el.placeholder = t(el.getAttribute('data-i18n-ph'));
+  });
+  document.querySelectorAll('.langtoggle button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.lang===currentLang);
+  });
+  document.getElementById('authSubmitBtn').textContent = authMode==='signin' ? t('auth.signIn') : t('auth.createAccount');
+}
+
+function setLanguage(lang){
+  currentLang = lang;
+  try{ localStorage.setItem('kpulse:lang', lang); }catch(e){}
+  applyStaticTranslations();
+  renderAll();
+}
+document.querySelectorAll('.langtoggle button').forEach(b=>{
+  b.addEventListener('click', ()=> setLanguage(b.dataset.lang));
+});
 
 // ---------- auth ----------
 function isConfigured(){
@@ -506,7 +775,7 @@ document.getElementById('tabSignIn').addEventListener('click', ()=>{
   authMode = 'signin';
   document.getElementById('tabSignIn').classList.add('active');
   document.getElementById('tabSignUp').classList.remove('active');
-  document.getElementById('authSubmitBtn').textContent = 'Sign In';
+  document.getElementById('authSubmitBtn').textContent = t('auth.signIn');
   setSignupFieldsVisible(false);
   clearAuthMsg();
 });
@@ -514,7 +783,7 @@ document.getElementById('tabSignUp').addEventListener('click', ()=>{
   authMode = 'signup';
   document.getElementById('tabSignUp').classList.add('active');
   document.getElementById('tabSignIn').classList.remove('active');
-  document.getElementById('authSubmitBtn').textContent = 'Create Account';
+  document.getElementById('authSubmitBtn').textContent = t('auth.createAccount');
   setSignupFieldsVisible(true);
   clearAuthMsg();
 });
@@ -522,7 +791,7 @@ document.getElementById('tabSignUp').addEventListener('click', ()=>{
 document.getElementById('authForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   if(!isConfigured()){
-    showAuthMsg('Supabase is not configured yet. Edit SUPABASE_URL / SUPABASE_ANON_KEY at the top of the script in index.html.', false);
+    showAuthMsg(t('auth.notConfigured'), false);
     return;
   }
   const email = document.getElementById('auth_email').value.trim();
@@ -541,7 +810,7 @@ document.getElementById('authForm').addEventListener('submit', async (e)=>{
       const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name, job_title, company } } });
       if(error){ showAuthMsg(error.message, false); }
       else if(data.session){ /* auto-confirmed, onAuthStateChange will pick it up */ }
-      else { showAuthMsg('Account created. Check your email to confirm, then sign in.', true); }
+      else { showAuthMsg(t('auth.accountCreated'), true); }
     }
   } finally {
     btn.disabled = false;
@@ -574,6 +843,7 @@ function onSignedOut(){
   currentUser = null;
   entries = [];
   constraints = [];
+  equipment = [];
   unsubscribeRealtime();
   document.getElementById('appRoot').hidden = true;
   document.getElementById('authScreen').hidden = false;
@@ -582,7 +852,7 @@ function onSignedOut(){
 
 function initAuth(){
   if(!isConfigured()){
-    document.getElementById('setupHint').textContent = 'Setup needed: add your Supabase URL and anon key in index.html before signing in.';
+    document.getElementById('setupHint').textContent = t('auth.setupNeeded');
     return;
   }
   // onAuthStateChange fires once immediately with the current session
@@ -625,7 +895,22 @@ function subscribeRealtime(){
       constraints = constraints.filter(c=>c.id!==payload.old.id);
       renderAll();
     }).subscribe();
-  realtimeChannels = [entriesCh, constraintsCh];
+  const equipmentCh = sb.channel('public:equipment')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'equipment' }, (payload)=>{
+      if(!equipment.find(x=>x.id===payload.new.id)){
+        equipment.unshift(rowToEquipment(payload.new));
+        renderAll();
+      }
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'equipment' }, (payload)=>{
+      const idx = equipment.findIndex(x=>x.id===payload.new.id);
+      if(idx>-1){ equipment[idx] = rowToEquipment(payload.new); renderAll(); }
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'equipment' }, (payload)=>{
+      equipment = equipment.filter(x=>x.id!==payload.old.id);
+      renderAll();
+    }).subscribe();
+  realtimeChannels = [entriesCh, constraintsCh, equipmentCh];
 }
 function unsubscribeRealtime(){
   realtimeChannels.forEach(ch=>sb.removeChannel(ch));
@@ -667,6 +952,12 @@ function constraintToRow(c){
     priority: c.priority, status: c.status, user_id: currentUser.id,
   };
 }
+function rowToEquipment(r){
+  return { id: r.id, userId: r.user_id, code: r.code, name: r.name, status: r.status, notes: r.notes };
+}
+function equipmentToRow(e){
+  return { code: e.code, name: e.name, status: e.status, notes: e.notes, user_id: currentUser.id };
+}
 
 // ---------- modal ----------
 function openModal(html){
@@ -681,26 +972,26 @@ document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); }
 function canEditRow(row){ return currentUser && row.userId === currentUser.id && !row.pending; }
 
 function openEntryModal(entry){
-  let html = `<h3>Daily Entry — ${entry.activity} · KP ${entry.kpFrom}–${entry.kpTo}</h3><div class="detail-grid">`;
+  let html = `<h3>${t('title.dailyEntry', { activity: entry.activity, from: entry.kpFrom, to: entry.kpTo })}</h3><div class="detail-grid">`;
   const rows = [
-    ['Entered By', entry.enteredBy||'—'], ['Date', entry.date||'—'],
-    ['Team / Spread', entry.team], ['Section', entry.section],
-    ['Activity', entry.activity], ['Unit', entry.unit],
-    ['Planned Qty', entry.planned], ['Actual Qty', entry.actual],
-    ['Manpower', entry.manpower], ['Equipment', entry.equipment||'—'],
-    ['Equipment ID', entry.equipmentId||'—'], ['Working Hours', entry.hours],
-    ['Downtime (hrs)', entry.downtime], ['QA/QC Status', entry.qaqc],
-    ['Has Constraint', entry.hasConstraint ? 'Yes' : 'No'], ['Reason for Delay', entry.reason||'—'],
-    ['HSE Observation', entry.hse||'—'],
+    [t('detail.enteredBy'), entry.enteredBy||t('detail.dash')], [t('detail.date'), entry.date||t('detail.dash')],
+    [t('detail.team'), entry.team], [t('detail.section'), entry.section],
+    [t('detail.activity'), entry.activity], [t('detail.unit'), entry.unit],
+    [t('detail.planned'), entry.planned], [t('detail.actual'), entry.actual],
+    [t('detail.manpower'), entry.manpower], [t('detail.equipment'), entry.equipment||t('detail.dash')],
+    [t('detail.equipmentId'), entry.equipmentId||t('detail.dash')], [t('detail.workingHours'), entry.hours],
+    [t('detail.downtime'), entry.downtime], [t('detail.qaqc'), entry.qaqc],
+    [t('detail.hasConstraint'), entry.hasConstraint ? t('detail.yes') : t('detail.no')], [t('detail.reason'), entry.reason||t('detail.dash')],
+    [t('detail.hse'), entry.hse||t('detail.dash')],
   ];
   rows.forEach(r=>{ html += `<div><div class="dlabel">${r[0]}</div><div class="dval">${r[1]}</div></div>`; });
-  html += `<div class="detail-full"><div class="dlabel">Remarks</div><div class="dval">${entry.remarks||'—'}</div></div>`;
+  html += `<div class="detail-full"><div class="dlabel">${t('detail.remarks')}</div><div class="dval">${entry.remarks||t('detail.dash')}</div></div>`;
   html += '</div>';
   if(entry.photo){ html += `<img class="modal-photo" src="${entry.photo}" alt="Site photo">`; }
   if(canEditRow(entry)){
     html += '<div style="margin-top:16px;display:flex;gap:10px;">';
-    html += '<button type="button" class="ghost" id="editEntryBtn">Edit Entry</button>';
-    html += '<button type="button" class="ghost" id="deleteEntryBtn" style="color:var(--red);border-color:var(--red-bg);">Delete Entry</button>';
+    html += `<button type="button" class="ghost" id="editEntryBtn">${t('btn.editEntry')}</button>`;
+    html += `<button type="button" class="ghost" id="deleteEntryBtn" style="color:var(--red);border-color:var(--red-bg);">${t('btn.deleteEntry')}</button>`;
     html += '</div>';
   }
   openModal(html);
@@ -711,26 +1002,26 @@ function openEntryModal(entry){
 }
 
 async function deleteEntry(entry){
-  if(!confirm('Delete this entry? This cannot be undone.')) return;
+  if(!confirm(t('confirm.deleteEntry'))) return;
   const { error } = await sb.from('entries').delete().eq('id', entry.id);
-  if(error){ showToast('Could not delete: ' + error.message); return; }
+  if(error){ showToast(t('toast.couldNotDelete') + error.message); return; }
   entries = entries.filter(e=>e.id!==entry.id);
   closeModal();
-  showToast('Entry deleted.');
+  showToast(t('toast.entryDeleted'));
   renderAll();
 }
 
 function openEntryEditForm(entry){
   const html = `
-    <h3>Edit Entry — KP ${entry.kpFrom}–${entry.kpTo}</h3>
+    <h3>${t('title.editEntry', { from: entry.kpFrom, to: entry.kpTo })}</h3>
     <form id="editEntryForm">
       <div class="row2">
-        <div class="field"><label>Date<span class="req">*</span></label><input type="date" id="e_date" required></div>
-        <div class="field"><label>Team / Spread</label><select id="e_team"><option>Fahud</option><option>Dhank</option></select></div>
+        <div class="field"><label>${t('entry.date')}<span class="req">*</span></label><input type="date" id="e_date" required></div>
+        <div class="field"><label>${t('entry.team')}</label><select id="e_team"><option>Fahud</option><option>Dhank</option></select></div>
       </div>
       <div class="row2">
-        <div class="field"><label>Section</label><select id="e_section"><option>SP1</option><option>SP2</option><option>SP3</option></select></div>
-        <div class="field"><label>Activity</label>
+        <div class="field"><label>${t('entry.section')}</label><select id="e_section"><option>SP1</option><option>SP2</option><option>SP3</option></select></div>
+        <div class="field"><label>${t('entry.activity')}</label>
           <select id="e_activity">
             <option>ROW</option><option>Trenching</option><option>Excavation</option>
             <option>Pre-Padding</option><option>Post-Padding</option><option>Backfilling</option>
@@ -739,33 +1030,33 @@ function openEntryEditForm(entry){
         </div>
       </div>
       <div class="row2">
-        <div class="field"><label>KP From<span class="req">*</span></label><input type="number" step="0.001" id="e_kpfrom" required></div>
-        <div class="field"><label>KP To<span class="req">*</span></label><input type="number" step="0.001" id="e_kpto" required></div>
+        <div class="field"><label>${t('entry.kpFrom')}<span class="req">*</span></label><input type="number" step="0.001" id="e_kpfrom" required></div>
+        <div class="field"><label>${t('entry.kpTo')}<span class="req">*</span></label><input type="number" step="0.001" id="e_kpto" required></div>
       </div>
       <div class="row3">
-        <div class="field"><label>Unit</label><select id="e_unit"><option>m</option><option>m3</option></select></div>
-        <div class="field"><label>Planned Qty</label><input type="number" id="e_planned"></div>
-        <div class="field"><label>Actual Qty</label><input type="number" id="e_actual"></div>
+        <div class="field"><label>${t('entry.unit')}</label><select id="e_unit"><option>m</option><option>m3</option></select></div>
+        <div class="field"><label>${t('entry.planned')}</label><input type="number" id="e_planned"></div>
+        <div class="field"><label>${t('entry.actual')}</label><input type="number" id="e_actual"></div>
       </div>
       <div class="row3">
-        <div class="field"><label>Manpower</label><input type="number" id="e_manpower"></div>
-        <div class="field"><label>Working Hours</label><input type="number" id="e_hours"></div>
-        <div class="field"><label>Downtime (hrs)</label><input type="number" id="e_downtime"></div>
+        <div class="field"><label>${t('entry.manpower')}</label><input type="number" id="e_manpower"></div>
+        <div class="field"><label>${t('entry.workingHours')}</label><input type="number" id="e_hours"></div>
+        <div class="field"><label>${t('entry.downtime')}</label><input type="number" id="e_downtime"></div>
       </div>
       <div class="row2">
-        <div class="field"><label>Equipment</label><input type="text" id="e_equipment" list="equipmentOptions"></div>
-        <div class="field"><label>Equipment ID</label><input type="text" id="e_equipid"></div>
+        <div class="field"><label>${t('entry.equipment')}</label><input type="text" id="e_equipment" list="equipmentOptions"></div>
+        <div class="field"><label>${t('entry.equipmentId')}</label><input type="text" id="e_equipid" list="equipmentIdOptions"></div>
       </div>
       <div class="row2">
-        <div class="field"><label>HSE Observation</label><input type="text" id="e_hse"></div>
-        <div class="field"><label>QA/QC Status</label><select id="e_qaqc"><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+        <div class="field"><label>${t('entry.hse')}</label><input type="text" id="e_hse"></div>
+        <div class="field"><label>${t('entry.qaqc')}</label><select id="e_qaqc"><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
       </div>
       <div class="field">
-        <label><input type="checkbox" id="e_hasconstraint" style="width:auto;display:inline-block;vertical-align:middle;margin-right:6px;">This entry has a constraint / stoppage</label>
+        <label><input type="checkbox" id="e_hasconstraint" style="width:auto;display:inline-block;vertical-align:middle;margin-right:6px;">${t('entry.hasConstraint')}</label>
       </div>
-      <div class="field"><label>Reason for Delay (if any)</label><input type="text" id="e_reason"></div>
-      <div class="field"><label>Remarks</label><textarea id="e_remarks" rows="2"></textarea></div>
-      <button type="submit" class="primary" id="editEntrySubmitBtn">Save Changes</button>
+      <div class="field"><label>${t('entry.reason')}</label><input type="text" id="e_reason"></div>
+      <div class="field"><label>${t('entry.remarks')}</label><textarea id="e_remarks" rows="2"></textarea></div>
+      <button type="submit" class="primary" id="editEntrySubmitBtn">${t('equip.save')}</button>
     </form>`;
   openModal(html);
   document.getElementById('e_date').value = entry.date || '';
@@ -817,29 +1108,29 @@ function openEntryEditForm(entry){
     btn.disabled = true;
     const { data, error } = await sb.from('entries').update(entryToRow(updated)).eq('id', entry.id).select().single();
     btn.disabled = false;
-    if(error){ showToast('Could not save changes: ' + error.message); return; }
+    if(error){ showToast(t('toast.couldNotSave') + error.message); return; }
     const idx = entries.findIndex(x=>x.id===entry.id);
     if(idx>-1) entries[idx] = rowToEntry(data);
     closeModal();
-    showToast('Entry updated.');
+    showToast(t('toast.entryUpdated'));
     renderAll();
   });
 }
 
 function openConstraintModal(c){
-  let html = `<h3>Constraint — KP ${c.kp}</h3><div class="detail-grid">`;
+  let html = `<h3>${t('title.constraint', { kp: c.kp })}</h3><div class="detail-grid">`;
   const rows = [
-    ['Entered By', c.enteredBy||'—'], ['Date Identified', c.date||'—'],
-    ['Activity Affected', c.activity], ['Category', c.category],
-    ['Responsible', c.responsible||'—'], ['Priority', c.priority],
-    ['Status', c.status],
+    [t('detail.enteredBy'), c.enteredBy||t('detail.dash')], [t('detail.dateIdentified'), c.date||t('detail.dash')],
+    [t('detail.activityAffected'), c.activity], [t('detail.category'), c.category],
+    [t('detail.responsible'), c.responsible||t('detail.dash')], [t('detail.priority'), c.priority],
+    [t('detail.status'), c.status],
   ];
   rows.forEach(r=>{ html += `<div><div class="dlabel">${r[0]}</div><div class="dval">${r[1]}</div></div>`; });
-  html += `<div class="detail-full"><div class="dlabel">Description</div><div class="dval">${c.description||'—'}</div></div></div>`;
+  html += `<div class="detail-full"><div class="dlabel">${t('detail.description')}</div><div class="dval">${c.description||t('detail.dash')}</div></div></div>`;
   if(canEditRow(c)){
     html += '<div style="margin-top:16px;display:flex;gap:10px;">';
-    html += '<button type="button" class="ghost" id="editConstraintBtn">Edit Constraint</button>';
-    html += '<button type="button" class="ghost" id="deleteConstraintBtn" style="color:var(--red);border-color:var(--red-bg);">Delete Constraint</button>';
+    html += `<button type="button" class="ghost" id="editConstraintBtn">${t('btn.editConstraint')}</button>`;
+    html += `<button type="button" class="ghost" id="deleteConstraintBtn" style="color:var(--red);border-color:var(--red-bg);">${t('btn.deleteConstraint')}</button>`;
     html += '</div>';
   }
   openModal(html);
@@ -850,32 +1141,32 @@ function openConstraintModal(c){
 }
 
 async function deleteConstraint(c){
-  if(!confirm('Delete this constraint? This cannot be undone.')) return;
+  if(!confirm(t('confirm.deleteConstraint'))) return;
   const { error } = await sb.from('constraints').delete().eq('id', c.id);
-  if(error){ showToast('Could not delete: ' + error.message); return; }
+  if(error){ showToast(t('toast.couldNotDelete') + error.message); return; }
   constraints = constraints.filter(x=>x.id!==c.id);
   closeModal();
-  showToast('Constraint deleted.');
+  showToast(t('toast.constraintDeleted'));
   renderAll();
 }
 
 function openConstraintEditForm(c){
   const html = `
-    <h3>Edit Constraint — KP ${c.kp}</h3>
+    <h3>${t('title.editConstraint', { kp: c.kp })}</h3>
     <form id="editConstraintForm">
       <div class="row2">
-        <div class="field"><label>Date Identified<span class="req">*</span></label><input type="date" id="e_c_date" required></div>
-        <div class="field"><label>KP / Location<span class="req">*</span></label><input type="text" id="e_c_kp" required></div>
+        <div class="field"><label>${t('constraints.dateIdentified')}<span class="req">*</span></label><input type="date" id="e_c_date" required></div>
+        <div class="field"><label>${t('constraints.kpLocation')}<span class="req">*</span></label><input type="text" id="e_c_kp" required></div>
       </div>
       <div class="row2">
-        <div class="field"><label>Activity Affected</label>
+        <div class="field"><label>${t('constraints.activityAffected')}</label>
           <select id="e_c_activity">
             <option>ROW</option><option>Trenching</option><option>Excavation</option>
             <option>Pre-Padding</option><option>Post-Padding</option><option>Backfilling</option>
             <option>Re-Excavation</option><option>Cleaning</option><option>Dewatering</option>
           </select>
         </div>
-        <div class="field"><label>Category</label>
+        <div class="field"><label>${t('constraints.category')}</label>
           <select id="e_c_category">
             <option>Water / Dewatering</option><option>Weather</option><option>Access</option>
             <option>Equipment</option><option>Manpower</option><option>Material</option>
@@ -884,13 +1175,13 @@ function openConstraintEditForm(c){
           </select>
         </div>
       </div>
-      <div class="field"><label>Description<span class="req">*</span></label><textarea id="e_c_desc" rows="2" required></textarea></div>
+      <div class="field"><label>${t('constraints.description')}<span class="req">*</span></label><textarea id="e_c_desc" rows="2" required></textarea></div>
       <div class="row3">
-        <div class="field"><label>Responsible Party</label><input type="text" id="e_c_resp"></div>
-        <div class="field"><label>Priority</label><select id="e_c_priority"><option>High</option><option>Medium</option><option>Low</option></select></div>
-        <div class="field"><label>Status</label><select id="e_c_status"><option>Open</option><option>In Progress</option><option>Closed</option></select></div>
+        <div class="field"><label>${t('constraints.responsible')}</label><input type="text" id="e_c_resp"></div>
+        <div class="field"><label>${t('constraints.priority')}</label><select id="e_c_priority"><option>High</option><option>Medium</option><option>Low</option></select></div>
+        <div class="field"><label>${t('constraints.status')}</label><select id="e_c_status"><option>Open</option><option>In Progress</option><option>Closed</option></select></div>
       </div>
-      <button type="submit" class="primary" id="editConstraintSubmitBtn">Save Changes</button>
+      <button type="submit" class="primary" id="editConstraintSubmitBtn">${t('equip.save')}</button>
     </form>`;
   openModal(html);
   document.getElementById('e_c_date').value = c.date || '';
@@ -919,13 +1210,86 @@ function openConstraintEditForm(c){
     btn.disabled = true;
     const { data, error } = await sb.from('constraints').update(constraintToRow(updated)).eq('id', c.id).select().single();
     btn.disabled = false;
-    if(error){ showToast('Could not save changes: ' + error.message); return; }
+    if(error){ showToast(t('toast.couldNotSave') + error.message); return; }
     const idx = constraints.findIndex(x=>x.id===c.id);
     if(idx>-1) constraints[idx] = rowToConstraint(data);
     closeModal();
-    showToast('Constraint updated.');
+    showToast(t('toast.constraintUpdated'));
     renderAll();
   });
+}
+
+// ---------- equipment modal (edit / delete) ----------
+function openEquipmentModal(eq){
+  let html = `<h3>${t('title.equipment', { name: eq.name })}</h3><div class="detail-grid">`;
+  const rows = [
+    [t('detail.code'), eq.code||t('detail.dash')], [t('detail.name'), eq.name],
+    [t('detail.status'), eq.status],
+  ];
+  rows.forEach(r=>{ html += `<div><div class="dlabel">${r[0]}</div><div class="dval">${r[1]}</div></div>`; });
+  html += `<div class="detail-full"><div class="dlabel">${t('detail.notes')}</div><div class="dval">${eq.notes||t('detail.dash')}</div></div>`;
+  html += `<div class="detail-full"><div class="dlabel">${t('detail.totalHours')}</div><div class="dval">${(equipmentHoursMap()[eq.code] || equipmentHoursMap()[eq.name] || 0).toLocaleString()}</div></div>`;
+  html += '</div>';
+  html += '<div style="margin-top:16px;display:flex;gap:10px;">';
+  html += `<button type="button" class="ghost" id="editEquipmentBtn">${t('equip.edit')}</button>`;
+  if(currentUser && eq.userId === currentUser.id){
+    html += `<button type="button" class="ghost" id="deleteEquipmentBtn" style="color:var(--red);border-color:var(--red-bg);">${t('equip.delete')}</button>`;
+  }
+  html += '</div>';
+  openModal(html);
+  document.getElementById('editEquipmentBtn').addEventListener('click', ()=> openEquipmentEditForm(eq));
+  if(currentUser && eq.userId === currentUser.id){
+    document.getElementById('deleteEquipmentBtn').addEventListener('click', ()=> deleteEquipment(eq));
+  }
+}
+
+function openEquipmentEditForm(eq){
+  const html = `
+    <h3>${t('title.editEquipment', { name: eq.name })}</h3>
+    <form id="editEquipmentForm">
+      <div class="row2">
+        <div class="field"><label>${t('equip.code')}<span class="req">*</span></label><input type="text" id="e_q_code" required></div>
+        <div class="field"><label>${t('equip.name')}<span class="req">*</span></label><input type="text" id="e_q_name" required></div>
+      </div>
+      <div class="field"><label>${t('equip.status')}</label><select id="e_q_status"><option>Active</option><option>Under Maintenance</option><option>Idle</option></select></div>
+      <div class="field"><label>${t('equip.notes')}</label><textarea id="e_q_notes" rows="2"></textarea></div>
+      <button type="submit" class="primary" id="editEquipmentSubmitBtn">${t('equip.save')}</button>
+    </form>`;
+  openModal(html);
+  document.getElementById('e_q_code').value = eq.code || '';
+  document.getElementById('e_q_name').value = eq.name || '';
+  document.getElementById('e_q_status').value = eq.status;
+  document.getElementById('e_q_notes').value = eq.notes || '';
+
+  document.getElementById('editEquipmentForm').addEventListener('submit', async (ev)=>{
+    ev.preventDefault();
+    const updated = {
+      code: document.getElementById('e_q_code').value,
+      name: document.getElementById('e_q_name').value,
+      status: document.getElementById('e_q_status').value,
+      notes: document.getElementById('e_q_notes').value,
+    };
+    const btn = document.getElementById('editEquipmentSubmitBtn');
+    btn.disabled = true;
+    const { data, error } = await sb.from('equipment').update(equipmentToRow(updated)).eq('id', eq.id).select().single();
+    btn.disabled = false;
+    if(error){ showToast(t('toast.couldNotSave') + error.message); return; }
+    const idx = equipment.findIndex(x=>x.id===eq.id);
+    if(idx>-1) equipment[idx] = rowToEquipment(data);
+    closeModal();
+    showToast(t('toast.equipmentUpdated'));
+    renderAll();
+  });
+}
+
+async function deleteEquipment(eq){
+  if(!confirm(t('confirm.deleteEquipment'))) return;
+  const { error } = await sb.from('equipment').delete().eq('id', eq.id);
+  if(error){ showToast(t('toast.couldNotDelete') + error.message); return; }
+  equipment = equipment.filter(x=>x.id!==eq.id);
+  closeModal();
+  showToast(t('toast.equipmentDeleted'));
+  renderAll();
 }
 
 // ---------- photo capture ----------
@@ -963,16 +1327,21 @@ function showToast(msg){
 // ---------- storage (Supabase) ----------
 async function loadAll(){
   const { data: entriesData, error: e1 } = await sb.from('entries').select('*').order('created_at', { ascending: false });
-  if(e1){ showToast('Could not load entries: ' + e1.message); }
+  if(e1){ showToast(t('toast.couldNotLoad') + e1.message); }
   entries = (entriesData || []).map(rowToEntry);
 
   const { data: consData, error: e2 } = await sb.from('constraints').select('*').order('created_at', { ascending: false });
-  if(e2){ showToast('Could not load constraints: ' + e2.message); }
+  if(e2){ showToast(t('toast.couldNotLoad') + e2.message); }
   constraints = (consData || []).map(rowToConstraint);
+
+  const { data: equipData, error: e3 } = await sb.from('equipment').select('*').order('created_at', { ascending: false });
+  if(e3){ showToast(t('toast.couldNotLoad') + e3.message); }
+  equipment = (equipData || []).map(rowToEquipment);
 
   loadPending().forEach(item=>{
     if(item.type==='entry') entries.unshift(item.display);
-    else constraints.unshift(item.display);
+    else if(item.type==='constraint') constraints.unshift(item.display);
+    else equipment.unshift(item.display);
   });
 
   renderAll();
@@ -1001,13 +1370,14 @@ function isNetworkError(err){
 async function trySyncPending(){
   if(!currentUser) return;
   const list = loadPending();
+  const tableFor = { entry: 'entries', constraint: 'constraints', equip: 'equipment' };
   for(const item of list){
     try{
-      const table = item.type==='entry' ? 'entries' : 'constraints';
+      const table = tableFor[item.type];
       const { data, error } = await sb.from(table).insert(item.row).select().single();
       if(error){
         removePendingByLocalId(item.localId);
-        showToast('A pending item failed to sync and was dropped: ' + error.message);
+        showToast(t('toast.pendingDropped') + error.message);
         continue;
       }
       removePendingByLocalId(item.localId);
@@ -1015,13 +1385,17 @@ async function trySyncPending(){
         const idx = entries.findIndex(e=>e.id===item.localId);
         const fresh = rowToEntry(data);
         if(idx>-1) entries[idx] = fresh; else entries.unshift(fresh);
-      } else {
+      } else if(item.type==='constraint'){
         const idx = constraints.findIndex(c=>c.id===item.localId);
         const fresh = rowToConstraint(data);
         if(idx>-1) constraints[idx] = fresh; else constraints.unshift(fresh);
+      } else {
+        const idx = equipment.findIndex(x=>x.id===item.localId);
+        const fresh = rowToEquipment(data);
+        if(idx>-1) equipment[idx] = fresh; else equipment.unshift(fresh);
       }
       renderAll();
-      showToast('Synced a pending item.');
+      showToast(t('toast.synced'));
     }catch(err){
       break; // still offline — stop and retry on the next 'online' event
     }
@@ -1039,6 +1413,7 @@ document.querySelectorAll('nav.tabs button').forEach(btn=>{
     if(btn.dataset.tab === 'dashboard') renderDashboard();
     if(btn.dataset.tab === 'kpview') renderKpView();
     if(btn.dataset.tab === 'constraints') renderConstraintTable();
+    if(btn.dataset.tab === 'equipment') renderEquipmentTable();
   });
 });
 
@@ -1091,26 +1466,26 @@ document.getElementById('entryForm').addEventListener('submit', async (e)=>{
     const display = { ...entry, id: 'local_'+Date.now(), userId: currentUser.id, pending: true };
     queuePending('entry', row, display);
     entries.unshift(display);
-    showToast('No connection — saved locally, will sync automatically.');
+    showToast(t('toast.noConnectionSaved'));
     afterSave();
     return;
   }
   try{
     const { data, error } = await sb.from('entries').insert(row).select().single();
-    if(error){ btn.disabled = false; showToast('Could not save: ' + error.message); return; }
+    if(error){ btn.disabled = false; showToast(t('toast.couldNotSave') + error.message); return; }
     entries.unshift(rowToEntry(data));
-    showToast('Daily entry saved.');
+    showToast(t('toast.entrySaved'));
     afterSave();
   }catch(err){
     if(isNetworkError(err)){
       const display = { ...entry, id: 'local_'+Date.now(), userId: currentUser.id, pending: true };
       queuePending('entry', row, display);
       entries.unshift(display);
-      showToast('Connection lost — saved locally, will sync automatically.');
+      showToast(t('toast.connectionLostSaved'));
       afterSave();
     } else {
       btn.disabled = false;
-      showToast('Could not save: ' + (err.message || 'Unknown error'));
+      showToast(t('toast.couldNotSave') + (err.message || 'Unknown error'));
     }
   }
 });
@@ -1145,26 +1520,73 @@ document.getElementById('constraintForm').addEventListener('submit', async (e)=>
     const display = { ...c, id: 'local_'+Date.now(), userId: currentUser.id, pending: true };
     queuePending('constraint', row, display);
     constraints.unshift(display);
-    showToast('No connection — saved locally, will sync automatically.');
+    showToast(t('toast.noConnectionSaved'));
     afterSave();
     return;
   }
   try{
     const { data, error } = await sb.from('constraints').insert(row).select().single();
-    if(error){ btn.disabled = false; showToast('Could not save: ' + error.message); return; }
+    if(error){ btn.disabled = false; showToast(t('toast.couldNotSave') + error.message); return; }
     constraints.unshift(rowToConstraint(data));
-    showToast('Constraint added to register.');
+    showToast(t('toast.constraintAdded'));
     afterSave();
   }catch(err){
     if(isNetworkError(err)){
       const display = { ...c, id: 'local_'+Date.now(), userId: currentUser.id, pending: true };
       queuePending('constraint', row, display);
       constraints.unshift(display);
-      showToast('Connection lost — saved locally, will sync automatically.');
+      showToast(t('toast.connectionLostSaved'));
       afterSave();
     } else {
       btn.disabled = false;
-      showToast('Could not save: ' + (err.message || 'Unknown error'));
+      showToast(t('toast.couldNotSave') + (err.message || 'Unknown error'));
+    }
+  }
+});
+
+// ---------- equipment form ----------
+document.getElementById('equipmentForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const eq = {
+    code: document.getElementById('q_code').value,
+    name: document.getElementById('q_name').value,
+    status: document.getElementById('q_status').value,
+    notes: document.getElementById('q_notes').value,
+  };
+  const btn = document.getElementById('equipmentSubmitBtn');
+  btn.disabled = true;
+  const row = equipmentToRow(eq);
+
+  function afterSave(){
+    btn.disabled = false;
+    e.target.reset();
+    renderAll();
+  }
+
+  if(!navigator.onLine){
+    const display = { ...eq, id: 'local_'+Date.now(), userId: currentUser.id, pending: true };
+    queuePending('equip', row, display);
+    equipment.unshift(display);
+    showToast(t('toast.noConnectionSaved'));
+    afterSave();
+    return;
+  }
+  try{
+    const { data, error } = await sb.from('equipment').insert(row).select().single();
+    if(error){ btn.disabled = false; showToast(t('toast.couldNotSave') + error.message); return; }
+    equipment.unshift(rowToEquipment(data));
+    showToast(t('toast.equipmentAdded'));
+    afterSave();
+  }catch(err){
+    if(isNetworkError(err)){
+      const display = { ...eq, id: 'local_'+Date.now(), userId: currentUser.id, pending: true };
+      queuePending('equip', row, display);
+      equipment.unshift(display);
+      showToast(t('toast.connectionLostSaved'));
+      afterSave();
+    } else {
+      btn.disabled = false;
+      showToast(t('toast.couldNotSave') + (err.message || 'Unknown error'));
     }
   }
 });
@@ -1180,10 +1602,19 @@ document.getElementById('filterMonth').addEventListener('change', renderRecentEn
 
 // ---------- render ----------
 function renderAll(){
+  refreshEquipmentDatalists();
   renderRecentEntries();
   renderDashboard();
   renderKpView();
   renderConstraintTable();
+  renderEquipmentTable();
+}
+
+function refreshEquipmentDatalists(){
+  const names = Array.from(new Set([...equipment.map(e=>e.name).filter(Boolean), ...DEFAULT_EQUIPMENT_NAMES]));
+  document.getElementById('equipmentOptions').innerHTML = names.map(n=>`<option value="${n}">`).join('');
+  const codes = equipment.map(e=>e.code).filter(Boolean);
+  document.getElementById('equipmentIdOptions').innerHTML = codes.map(c=>`<option value="${c}">`).join('');
 }
 
 const MONTH_NAMES = [['01','January'],['02','February'],['03','March'],['04','April'],['05','May'],['06','June'],['07','July'],['08','August'],['09','September'],['10','October'],['11','November'],['12','December']];
@@ -1192,16 +1623,16 @@ function populateUserFilter(){
   const sel = document.getElementById('filterUser');
   const current = sel.value;
   const names = Array.from(new Set(entries.map(e=>e.enteredBy).filter(Boolean))).sort();
-  sel.innerHTML = '<option value="">Everyone</option>' + names.map(n=>`<option${n===current?' selected':''}>${n}</option>`).join('');
+  sel.innerHTML = `<option value="">${t('entries.everyone')}</option>` + names.map(n=>`<option${n===current?' selected':''}>${n}</option>`).join('');
 
   const yearSel = document.getElementById('filterYear');
   const yearCurrent = yearSel.value;
   const years = Array.from(new Set(entries.map(e=>e.date && e.date.slice(0,4)).filter(Boolean))).sort().reverse();
-  yearSel.innerHTML = '<option value="">All Years</option>' + years.map(y=>`<option${y===yearCurrent?' selected':''}>${y}</option>`).join('');
+  yearSel.innerHTML = `<option value="">${t('entries.allYears')}</option>` + years.map(y=>`<option${y===yearCurrent?' selected':''}>${y}</option>`).join('');
 
   const monthSel = document.getElementById('filterMonth');
   const monthCurrent = monthSel.value;
-  monthSel.innerHTML = '<option value="">All Months</option>' + MONTH_NAMES.map(([v,n])=>`<option value="${v}"${v===monthCurrent?' selected':''}>${n}</option>`).join('');
+  monthSel.innerHTML = `<option value="">${t('entries.allMonths')}</option>` + MONTH_NAMES.map(([v,n])=>`<option value="${v}"${v===monthCurrent?' selected':''}>${n}</option>`).join('');
 }
 
 function getFilteredEntries(){
@@ -1221,14 +1652,14 @@ function renderRecentEntries(){
   populateUserFilter();
   const el = document.getElementById('recentEntries');
   let filtered = getFilteredEntries();
-  if(filtered.length===0){ el.innerHTML = '<div class="empty">No entries match this filter.</div>'; return; }
-  let html = '<div class="tablewrap"><table><thead><tr><th>Date</th><th>Entered By</th><th>Activity</th><th>KP</th><th>Actual</th></tr></thead><tbody>';
+  if(filtered.length===0){ el.innerHTML = `<div class="empty">${t('entries.noMatch')}</div>`; return; }
+  let html = `<div class="tablewrap"><table><thead><tr><th>${t('entries.colDate')}</th><th>${t('entries.colEnteredBy')}</th><th>${t('entries.colActivity')}</th><th>${t('entries.colKP')}</th><th>${t('entries.colActual')}</th></tr></thead><tbody>`;
   filtered.slice(0,25).forEach(en=>{
-    const pendingPill = en.pending ? ' <span class="pill gray">Pending sync</span>' : '';
-    html += `<tr class="clickable" data-id="${en.id}"><td>${en.date||'-'}${pendingPill}</td><td>${en.enteredBy||'—'}</td><td>${en.activity}</td><td>${en.kpFrom}–${en.kpTo}</td><td>${en.actual} ${en.unit}</td></tr>`;
+    const pendingPill = en.pending ? ` <span class="pill gray">${t('entries.pendingSync')}</span>` : '';
+    html += `<tr class="clickable" data-id="${en.id}"><td>${en.date||'-'}${pendingPill}</td><td>${en.enteredBy||t('detail.dash')}</td><td>${en.activity}</td><td>${en.kpFrom}–${en.kpTo}</td><td>${en.actual} ${en.unit}</td></tr>`;
   });
   html += '</tbody></table></div>';
-  if(filtered.length>25) html += `<p class="footnote">Showing 25 of ${filtered.length} matching entries.</p>`;
+  if(filtered.length>25) html += `<p class="footnote">${t('entries.showingOf', { n: 25, m: filtered.length })}</p>`;
   el.innerHTML = html;
   el.querySelectorAll('tr[data-id]').forEach(row=>{
     row.addEventListener('click', ()=>{
@@ -1248,7 +1679,7 @@ function exportEntriesToExcel(){
     'Reason for Delay': en.reason, 'HSE Observation': en.hse, 'QA/QC Status': en.qaqc,
     Remarks: en.remarks,
   }));
-  if(rows.length===0){ showToast('No entries to export.'); return; }
+  if(rows.length===0){ showToast(t('toast.noEntriesExport')); return; }
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Entries');
@@ -1262,13 +1693,23 @@ function exportConstraintsToExcel(){
     Category: c.category, Description: c.description, 'Responsible Party': c.responsible,
     Priority: c.priority, Status: c.status,
   }));
-  if(rows.length===0){ showToast('No constraints to export.'); return; }
+  if(rows.length===0){ showToast(t('toast.noConstraintsExport')); return; }
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Constraints');
   XLSX.writeFile(wb, `KPulse-Constraints-${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 document.getElementById('exportConstraintsBtn').addEventListener('click', exportConstraintsToExcel);
+
+function equipmentHoursMap(){
+  const map = {};
+  entries.forEach(e=>{
+    const key = (e.equipmentId || e.equipment || '').trim();
+    if(!key) return;
+    map[key] = (map[key]||0) + (e.hours||0);
+  });
+  return map;
+}
 
 function renderDashboard(){
   document.getElementById('kpi_entries').textContent = entries.length;
@@ -1278,12 +1719,20 @@ function renderDashboard(){
   document.getElementById('kpi_kp').textContent = maxKp.toFixed(1) + ' km';
   const openConstraints = constraints.filter(c=>c.status!=='Closed').length;
   document.getElementById('kpi_constraints').textContent = openConstraints;
+  const totalManpower = entries.reduce((s,e)=>s+ (e.manpower||0), 0);
+  document.getElementById('kpi_manpower').textContent = totalManpower.toLocaleString();
+  const totalHours = entries.reduce((s,e)=>s+ (e.hours||0), 0);
+  document.getElementById('kpi_hours').textContent = totalHours.toLocaleString();
+  const totalDowntime = entries.reduce((s,e)=>s+ (e.downtime||0), 0);
+  document.getElementById('kpi_downtime').textContent = totalDowntime.toLocaleString();
+  const activeEquip = equipment.filter(e=>e.status==='Active').length;
+  document.getElementById('kpi_active_equip').textContent = activeEquip;
 
   const byActivity = {};
   entries.forEach(e=>{ byActivity[e.activity] = (byActivity[e.activity]||0) + (e.actual||0); });
   const dashActEl = document.getElementById('dashActivity');
   const acts = Object.keys(byActivity);
-  if(acts.length===0){ dashActEl.innerHTML = '<div class="empty">No data yet.</div>'; }
+  if(acts.length===0){ dashActEl.innerHTML = `<div class="empty">${t('dash.noData')}</div>`; }
   else{
     const maxVal = Math.max(...acts.map(a=>byActivity[a]), 1);
     let html='';
@@ -1296,9 +1745,9 @@ function renderDashboard(){
 
   const dashConEl = document.getElementById('dashConstraints');
   const openList = constraints.filter(c=>c.status!=='Closed').slice(0,6);
-  if(openList.length===0){ dashConEl.innerHTML = '<div class="empty">No open constraints.</div>'; }
+  if(openList.length===0){ dashConEl.innerHTML = `<div class="empty">${t('dash.noConstraints')}</div>`; }
   else{
-    let html = '<div class="tablewrap"><table><thead><tr><th>KP</th><th>Category</th><th>Priority</th></tr></thead><tbody>';
+    let html = `<div class="tablewrap"><table><thead><tr><th>${t('dash.colKP')}</th><th>${t('dash.colCategory')}</th><th>${t('dash.colPriority')}</th></tr></thead><tbody>`;
     openList.forEach(c=>{
       const pillClass = c.priority==='High' ? 'red' : c.priority==='Medium' ? 'amber' : 'green';
       html += `<tr><td>${c.kp}</td><td>${c.category}</td><td><span class="pill ${pillClass}">${c.priority}</span></td></tr>`;
@@ -1306,6 +1755,39 @@ function renderDashboard(){
     html += '</tbody></table></div>';
     dashConEl.innerHTML = html;
   }
+
+  renderEquipmentUtilization();
+}
+
+function equipmentStatusPillClass(status){
+  return status==='Active' ? 'green' : status==='Under Maintenance' ? 'amber' : 'gray';
+}
+
+function renderEquipmentUtilization(){
+  const el = document.getElementById('dashEquipment');
+  const hoursMap = equipmentHoursMap();
+  const rows = [];
+  const seenKeys = new Set();
+  equipment.forEach(eq=>{
+    const hours = (eq.code && hoursMap[eq.code] || 0) + (eq.name && eq.name!==eq.code ? (hoursMap[eq.name]||0) : 0);
+    rows.push({ code: eq.code||t('detail.dash'), name: eq.name, status: eq.status, hours });
+    if(eq.code) seenKeys.add(eq.code);
+    if(eq.name) seenKeys.add(eq.name);
+  });
+  Object.keys(hoursMap).forEach(key=>{
+    if(!seenKeys.has(key)){
+      rows.push({ code: t('detail.dash'), name: key, status: null, hours: hoursMap[key] });
+    }
+  });
+  rows.sort((a,b)=>b.hours-a.hours);
+  if(rows.length===0){ el.innerHTML = `<div class="empty">${t('dash.noEquipData')}</div>`; return; }
+  let html = `<div class="tablewrap"><table><thead><tr><th>${t('dash.colEquipment')}</th><th>${t('dash.colCode')}</th><th>${t('dash.colStatus')}</th><th>${t('dash.colHours')}</th></tr></thead><tbody>`;
+  rows.slice(0,12).forEach(r=>{
+    const statusHtml = r.status ? `<span class="pill ${equipmentStatusPillClass(r.status)}">${r.status}</span>` : `<span class="pill gray">${t('detail.dash')}</span>`;
+    html += `<tr><td>${r.name}</td><td>${r.code}</td><td>${statusHtml}</td><td>${r.hours.toLocaleString()}</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
 }
 
 function renderKpView(){
@@ -1324,7 +1806,7 @@ function renderKpView(){
   const byActivity = {};
   entries.forEach(e=>{ byActivity[e.activity] = Math.max(byActivity[e.activity]||0, e.kpTo||0); });
   const acts = ACTIVITIES.filter(a=>byActivity[a]!==undefined);
-  if(acts.length===0){ lanesEl.innerHTML = '<div class="empty">Submit field entries to see corridor progress.</div>'; return; }
+  if(acts.length===0){ lanesEl.innerHTML = `<div class="empty">${t('kpview.emptyStart')}</div>`; return; }
   let html='';
   acts.forEach(a=>{
     const pct = Math.min(100, Math.round((byActivity[a]/corridorLength)*100));
@@ -1335,11 +1817,11 @@ function renderKpView(){
 
 function renderConstraintTable(){
   const el = document.getElementById('constraintTable');
-  if(constraints.length===0){ el.innerHTML = '<div class="empty">No constraints logged yet.</div>'; return; }
-  let html = '<div class="tablewrap"><table><thead><tr><th>Date</th><th>KP</th><th>Category</th><th>Priority</th><th>Status</th></tr></thead><tbody>';
+  if(constraints.length===0){ el.innerHTML = `<div class="empty">${t('constraints.emptyStart')}</div>`; return; }
+  let html = `<div class="tablewrap"><table><thead><tr><th>${t('constraints.colDate')}</th><th>${t('constraints.colKP')}</th><th>${t('constraints.colCategory')}</th><th>${t('constraints.colPriority')}</th><th>${t('constraints.colStatus')}</th></tr></thead><tbody>`;
   constraints.forEach(c=>{
     const pillClass = c.status==='Open' ? 'red' : c.status==='In Progress' ? 'amber' : 'green';
-    const pendingPill = c.pending ? ' <span class="pill gray">Pending sync</span>' : '';
+    const pendingPill = c.pending ? ` <span class="pill gray">${t('entries.pendingSync')}</span>` : '';
     html += `<tr class="clickable" data-id="${c.id}"><td>${c.date||'-'}${pendingPill}</td><td>${c.kp}</td><td>${c.category}</td><td>${c.priority}</td><td><span class="pill ${pillClass}">${c.status}</span></td></tr>`;
   });
   html += '</tbody></table></div>';
@@ -1352,9 +1834,31 @@ function renderConstraintTable(){
   });
 }
 
+function renderEquipmentTable(){
+  const el = document.getElementById('equipmentTable');
+  if(equipment.length===0){ el.innerHTML = `<div class="empty">${t('equip.emptyStart')}</div>`; return; }
+  const hoursMap = equipmentHoursMap();
+  let html = `<div class="tablewrap"><table><thead><tr><th>${t('equip.colCode')}</th><th>${t('equip.colName')}</th><th>${t('equip.colStatus')}</th><th>${t('equip.colHours')}</th></tr></thead><tbody>`;
+  equipment.forEach(eq=>{
+    const hours = (eq.code && hoursMap[eq.code] || 0) + (eq.name && eq.name!==eq.code ? (hoursMap[eq.name]||0) : 0);
+    const pendingPill = eq.pending ? ` <span class="pill gray">${t('entries.pendingSync')}</span>` : '';
+    html += `<tr class="clickable" data-id="${eq.id}"><td>${eq.code||'-'}${pendingPill}</td><td>${eq.name}</td><td><span class="pill ${equipmentStatusPillClass(eq.status)}">${eq.status}</span></td><td>${hours.toLocaleString()}</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+  el.querySelectorAll('tr[data-id]').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const eq = equipment.find(x=>x.id===row.dataset.id);
+      if(eq && !eq.pending) openEquipmentModal(eq);
+    });
+  });
+}
+
 // init
 document.getElementById('f_date').valueAsDate = new Date();
 document.getElementById('c_date').valueAsDate = new Date();
+applyStaticTranslations();
+refreshEquipmentDatalists();
 initAuth();
 </script>
 </body>
