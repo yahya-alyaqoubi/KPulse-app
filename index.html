@@ -360,6 +360,20 @@
   <!-- DASHBOARD -->
   <section class="panel" id="panel-dashboard">
     <div class="badge-note" data-i18n="dash.badgeNote">Data shown here is calculated live from every entry your team has submitted.</div>
+    <div class="toolbar">
+      <div class="field"><label data-i18n="dash.period">Report Period</label>
+        <select id="dashPeriod">
+          <option value="all" data-i18n="dash.periodAll">All Time</option>
+          <option value="week" data-i18n="dash.periodWeek">This Week</option>
+          <option value="month" data-i18n="dash.periodMonth">This Month</option>
+          <option value="custom" data-i18n="dash.periodCustom">Custom Range</option>
+        </select>
+      </div>
+      <div class="field" id="dashFromField" hidden><label data-i18n="dash.from">From</label><input type="date" id="dashFrom"></div>
+      <div class="field" id="dashToField" hidden><label data-i18n="dash.to">To</label><input type="date" id="dashTo"></div>
+      <div class="field" style="flex:none;"><label>&nbsp;</label><button type="button" class="ghost" id="exportDashboardBtn" data-i18n="entries.exportExcel">Export to Excel</button></div>
+    </div>
+    <p class="footnote" id="dashPeriodNote" style="margin:-8px 0 16px;"></p>
     <div class="grid cols-4" style="margin-bottom:16px;">
       <div class="kpi"><div class="num" id="kpi_entries">0</div><div class="lbl" data-i18n="dash.kpiEntries">Daily Entries Logged</div></div>
       <div class="kpi"><div class="num orange" id="kpi_actual">0 m</div><div class="lbl" data-i18n="dash.kpiActual">Total Actual Quantity</div></div>
@@ -560,6 +574,10 @@ const I18N = {
     'entries.colDate': 'Date', 'entries.colEnteredBy': 'Entered By', 'entries.colActivity': 'Activity',
     'entries.colKP': 'KP', 'entries.colActual': 'Actual', 'entries.showingOf': 'Showing {n} of {m} matching entries.',
     'dash.badgeNote': 'Data shown here is calculated live from every entry your team has submitted.',
+    'dash.period': 'Report Period', 'dash.periodAll': 'All Time', 'dash.periodWeek': 'This Week',
+    'dash.periodMonth': 'This Month', 'dash.periodCustom': 'Custom Range', 'dash.from': 'From', 'dash.to': 'To',
+    'dash.periodNoteWeek': 'Showing {from} – {to} (this week).', 'dash.periodNoteMonth': 'Showing {from} – {to} (this month).',
+    'dash.periodNoteCustom': 'Showing {from} – {to}.', 'dash.periodNoteAll': 'Showing all data since project start.',
     'dash.kpiEntries': 'Daily Entries Logged', 'dash.kpiActual': 'Total Actual Quantity',
     'dash.kpiKP': 'Furthest KP Reached', 'dash.kpiConstraints': 'Open Constraints',
     'dash.kpiManpower': 'Total Manpower Logged', 'dash.kpiHours': 'Total Working Hours',
@@ -651,6 +669,10 @@ const I18N = {
     'entries.colDate': 'التاريخ', 'entries.colEnteredBy': 'أدخله', 'entries.colActivity': 'النشاط',
     'entries.colKP': 'الكيلومتر', 'entries.colActual': 'الفعلي', 'entries.showingOf': 'عرض {n} من {m} إدخال مطابق.',
     'dash.badgeNote': 'البيانات المعروضة هنا تُحسب مباشرة من كل إدخال قدمه فريقك.',
+    'dash.period': 'فترة التقرير', 'dash.periodAll': 'كل الوقت', 'dash.periodWeek': 'هذا الأسبوع',
+    'dash.periodMonth': 'هذا الشهر', 'dash.periodCustom': 'فترة مخصصة', 'dash.from': 'من', 'dash.to': 'إلى',
+    'dash.periodNoteWeek': 'عرض {from} – {to} (هذا الأسبوع).', 'dash.periodNoteMonth': 'عرض {from} – {to} (هذا الشهر).',
+    'dash.periodNoteCustom': 'عرض {from} – {to}.', 'dash.periodNoteAll': 'عرض كل البيانات منذ بداية المشروع.',
     'dash.kpiEntries': 'التقارير اليومية المسجلة', 'dash.kpiActual': 'إجمالي الكمية الفعلية',
     'dash.kpiKP': 'أبعد نقطة كم تم الوصول إليها', 'dash.kpiConstraints': 'المعوقات المفتوحة',
     'dash.kpiManpower': 'إجمالي القوى العاملة المسجلة', 'dash.kpiHours': 'إجمالي ساعات التشغيل',
@@ -1670,15 +1692,7 @@ function renderRecentEntries(){
 }
 
 function exportEntriesToExcel(){
-  const rows = getFilteredEntries().map(en=>({
-    Date: en.date, 'Entered By': en.enteredBy, Team: en.team, Section: en.section,
-    'KP From': en.kpFrom, 'KP To': en.kpTo, Activity: en.activity, Unit: en.unit,
-    Planned: en.planned, Actual: en.actual, Manpower: en.manpower,
-    Equipment: en.equipment, 'Equipment ID': en.equipmentId, 'Working Hours': en.hours,
-    'Downtime (hrs)': en.downtime, 'Has Constraint': en.hasConstraint ? 'Yes' : 'No',
-    'Reason for Delay': en.reason, 'HSE Observation': en.hse, 'QA/QC Status': en.qaqc,
-    Remarks: en.remarks,
-  }));
+  const rows = entriesToExcelRows(getFilteredEntries());
   if(rows.length===0){ showToast(t('toast.noEntriesExport')); return; }
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
@@ -1701,9 +1715,97 @@ function exportConstraintsToExcel(){
 }
 document.getElementById('exportConstraintsBtn').addEventListener('click', exportConstraintsToExcel);
 
-function equipmentHoursMap(){
+// ---------- dashboard report period (All Time / This Week / This Month / Custom) ----------
+function pad2(n){ return String(n).padStart(2,'0'); }
+function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+
+function getDashboardDateRange(){
+  const period = document.getElementById('dashPeriod').value;
+  const now = new Date();
+  if(period === 'week'){
+    const day = now.getDay(); // 0=Sun..6=Sat
+    const diffToMonday = (day===0 ? 6 : day-1);
+    const from = new Date(now); from.setDate(now.getDate()-diffToMonday); from.setHours(0,0,0,0);
+    const to = new Date(from); to.setDate(from.getDate()+6);
+    return { from, to };
+  }
+  if(period === 'month'){
+    const from = new Date(now.getFullYear(), now.getMonth(), 1);
+    const to = new Date(now.getFullYear(), now.getMonth()+1, 0);
+    return { from, to };
+  }
+  if(period === 'custom'){
+    const fVal = document.getElementById('dashFrom').value;
+    const tVal = document.getElementById('dashTo').value;
+    return { from: fVal ? new Date(fVal) : null, to: tVal ? new Date(tVal) : null };
+  }
+  return { from: null, to: null };
+}
+
+function dateInRange(dateStr, from, to){
+  if(!dateStr) return false;
+  const d = new Date(dateStr);
+  if(from && d < from) return false;
+  if(to){ const toEnd = new Date(to); toEnd.setHours(23,59,59,999); if(d > toEnd) return false; }
+  return true;
+}
+
+function getDashboardEntries(){
+  const period = document.getElementById('dashPeriod').value;
+  if(period === 'all') return entries;
+  const { from, to } = getDashboardDateRange();
+  return entries.filter(e => dateInRange(e.date, from, to));
+}
+function getDashboardConstraints(){
+  const period = document.getElementById('dashPeriod').value;
+  if(period === 'all') return constraints;
+  const { from, to } = getDashboardDateRange();
+  return constraints.filter(c => dateInRange(c.date, from, to));
+}
+
+function updateDashboardPeriodUI(){
+  const period = document.getElementById('dashPeriod').value;
+  document.getElementById('dashFromField').hidden = period !== 'custom';
+  document.getElementById('dashToField').hidden = period !== 'custom';
+  const noteEl = document.getElementById('dashPeriodNote');
+  if(period === 'all'){ noteEl.textContent = t('dash.periodNoteAll'); return; }
+  const { from, to } = getDashboardDateRange();
+  if(!from || !to){ noteEl.textContent = ''; return; }
+  const key = period === 'week' ? 'dash.periodNoteWeek' : period === 'month' ? 'dash.periodNoteMonth' : 'dash.periodNoteCustom';
+  noteEl.textContent = t(key, { from: toISODate(from), to: toISODate(to) });
+}
+
+document.getElementById('dashPeriod').addEventListener('change', ()=>{ updateDashboardPeriodUI(); renderDashboard(); });
+document.getElementById('dashFrom').addEventListener('change', ()=>{ updateDashboardPeriodUI(); renderDashboard(); });
+document.getElementById('dashTo').addEventListener('change', ()=>{ updateDashboardPeriodUI(); renderDashboard(); });
+
+function entriesToExcelRows(list){
+  return list.map(en=>({
+    Date: en.date, 'Entered By': en.enteredBy, Team: en.team, Section: en.section,
+    'KP From': en.kpFrom, 'KP To': en.kpTo, Activity: en.activity, Unit: en.unit,
+    Planned: en.planned, Actual: en.actual, Manpower: en.manpower,
+    Equipment: en.equipment, 'Equipment ID': en.equipmentId, 'Working Hours': en.hours,
+    'Downtime (hrs)': en.downtime, 'Has Constraint': en.hasConstraint ? 'Yes' : 'No',
+    'Reason for Delay': en.reason, 'HSE Observation': en.hse, 'QA/QC Status': en.qaqc,
+    Remarks: en.remarks,
+  }));
+}
+
+function exportDashboardToExcel(){
+  const rows = entriesToExcelRows(getDashboardEntries());
+  if(rows.length===0){ showToast(t('toast.noEntriesExport')); return; }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Entries');
+  const period = document.getElementById('dashPeriod').value;
+  XLSX.writeFile(wb, `KPulse-Report-${period}-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+document.getElementById('exportDashboardBtn').addEventListener('click', exportDashboardToExcel);
+
+function equipmentHoursMap(list){
+  const source = list || entries;
   const map = {};
-  entries.forEach(e=>{
+  source.forEach(e=>{
     const key = (e.equipmentId || e.equipment || '').trim();
     if(!key) return;
     map[key] = (map[key]||0) + (e.hours||0);
@@ -1712,24 +1814,32 @@ function equipmentHoursMap(){
 }
 
 function renderDashboard(){
-  document.getElementById('kpi_entries').textContent = entries.length;
-  const totalActual = entries.reduce((s,e)=>s+ (e.actual||0), 0);
+  updateDashboardPeriodUI();
+  // "Furthest KP Reached" and "Active Equipment" are current cumulative
+  // state, not period activity, so they always reflect all-time data even
+  // when a report period is selected. Everything else below reflects only
+  // what happened within the selected period.
+  const dashEntries = getDashboardEntries();
+  const dashCons = getDashboardConstraints();
+
+  document.getElementById('kpi_entries').textContent = dashEntries.length;
+  const totalActual = dashEntries.reduce((s,e)=>s+ (e.actual||0), 0);
   document.getElementById('kpi_actual').textContent = totalActual.toLocaleString() + ' m';
   const maxKp = entries.reduce((m,e)=>Math.max(m, e.kpTo||0), 0);
   document.getElementById('kpi_kp').textContent = maxKp.toFixed(1) + ' km';
-  const openConstraints = constraints.filter(c=>c.status!=='Closed').length;
+  const openConstraints = dashCons.filter(c=>c.status!=='Closed').length;
   document.getElementById('kpi_constraints').textContent = openConstraints;
-  const totalManpower = entries.reduce((s,e)=>s+ (e.manpower||0), 0);
+  const totalManpower = dashEntries.reduce((s,e)=>s+ (e.manpower||0), 0);
   document.getElementById('kpi_manpower').textContent = totalManpower.toLocaleString();
-  const totalHours = entries.reduce((s,e)=>s+ (e.hours||0), 0);
+  const totalHours = dashEntries.reduce((s,e)=>s+ (e.hours||0), 0);
   document.getElementById('kpi_hours').textContent = totalHours.toLocaleString();
-  const totalDowntime = entries.reduce((s,e)=>s+ (e.downtime||0), 0);
+  const totalDowntime = dashEntries.reduce((s,e)=>s+ (e.downtime||0), 0);
   document.getElementById('kpi_downtime').textContent = totalDowntime.toLocaleString();
   const activeEquip = equipment.filter(e=>e.status==='Active').length;
   document.getElementById('kpi_active_equip').textContent = activeEquip;
 
   const byActivity = {};
-  entries.forEach(e=>{ byActivity[e.activity] = (byActivity[e.activity]||0) + (e.actual||0); });
+  dashEntries.forEach(e=>{ byActivity[e.activity] = (byActivity[e.activity]||0) + (e.actual||0); });
   const dashActEl = document.getElementById('dashActivity');
   const acts = Object.keys(byActivity);
   if(acts.length===0){ dashActEl.innerHTML = `<div class="empty">${t('dash.noData')}</div>`; }
@@ -1744,7 +1854,7 @@ function renderDashboard(){
   }
 
   const dashConEl = document.getElementById('dashConstraints');
-  const openList = constraints.filter(c=>c.status!=='Closed').slice(0,6);
+  const openList = dashCons.filter(c=>c.status!=='Closed').slice(0,6);
   if(openList.length===0){ dashConEl.innerHTML = `<div class="empty">${t('dash.noConstraints')}</div>`; }
   else{
     let html = `<div class="tablewrap"><table><thead><tr><th>${t('dash.colKP')}</th><th>${t('dash.colCategory')}</th><th>${t('dash.colPriority')}</th></tr></thead><tbody>`;
@@ -1756,16 +1866,16 @@ function renderDashboard(){
     dashConEl.innerHTML = html;
   }
 
-  renderEquipmentUtilization();
+  renderEquipmentUtilization(dashEntries);
 }
 
 function equipmentStatusPillClass(status){
   return status==='Active' ? 'green' : status==='Under Maintenance' ? 'amber' : 'gray';
 }
 
-function renderEquipmentUtilization(){
+function renderEquipmentUtilization(list){
   const el = document.getElementById('dashEquipment');
-  const hoursMap = equipmentHoursMap();
+  const hoursMap = equipmentHoursMap(list);
   const rows = [];
   const seenKeys = new Set();
   equipment.forEach(eq=>{
